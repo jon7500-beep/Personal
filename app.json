@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Pokemon Game",
+    "slug": "pokemon-game",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#1a1a2e"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.player.pokemongame"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1a1a2e"
+      },
+      "package": "com.player.pokemongame"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
