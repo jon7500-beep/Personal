@@ -72,6 +72,9 @@ button:active{opacity:.7}
 .flash{animation:flash .25s 2}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 .shake{animation:shake .4s}
+@keyframes hitPop{0%{transform:scale(1.3);opacity:.9}100%{transform:scale(2.2);opacity:0}}
+@keyframes legGlow{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+.leg-glow{animation:legGlow 1.8s ease-in-out infinite}
 </style>
 </head>
 <body>
@@ -205,6 +208,17 @@ const SFX = {
   step()    { if(_muted)return; this._play(c=>{ const o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(_masterGain); o.type='triangle'; o.frequency.value=80+Math.random()*30; g.gain.setValueAtTime(.06,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.05); o.start();o.stop(c.currentTime+.06); }); },
   heal()    { if(_muted)return; [Hz.G4,Hz.A4,Hz.B4,Hz.C5].forEach((f,i)=>_note(f,_actx.currentTime+i*.1,.2,'triangle',.1)); },
   buy()     { if(_muted)return; _note(Hz.G5,_actx.currentTime,.1,'square',.1); _note(Hz.C5,_actx.currentTime+.12,.2,'square',.1); },
+  legendary(){ if(_muted)return; getACtx(); [Hz.B3,Hz.E4,Hz.G4,Hz.B4,Hz.E5].forEach((f,i)=>_note(f,_actx.currentTime+i*.14,.4,'triangle',.14)); setTimeout(()=>{ if(!_muted) [Hz.A4,Hz.C5,Hz.E5,Hz.A5].forEach((f,i)=>_note(f,_actx.currentTime+i*.1,.3,'square',.12)); },800); },
+  typeHit(type){
+    if(_muted)return; getACtx(); const t=_actx.currentTime;
+    const map={Fire:[220,180,.18,'sawtooth'],Water:[320,280,.14,'sine'],Electric:[880,440,.1,'square'],Grass:[260,200,.13,'triangle'],Ice:[520,480,.12,'sine'],Fighting:[110,80,.2,'square'],Psychic:[660,440,.1,'sine'],Ghost:[180,100,.15,'triangle'],Ground:[80,40,.22,'sawtooth'],Rock:[160,100,.2,'square'],Flying:[440,330,.1,'sine'],Normal:[200,160,.12,'square']};
+    const [f1,f2,vol,wave]=map[type]||map.Normal;
+    const o=_actx.createOscillator(),g=_actx.createGain(); o.connect(g);g.connect(_masterGain);
+    o.type=wave; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+.14);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.001,t+.18); o.start(t); o.stop(t+.2);
+    if(type==='Electric'){ const o2=_actx.createOscillator(),g2=_actx.createGain(); o2.connect(g2);g2.connect(_masterGain); o2.type='square'; o2.frequency.value=220; g2.gain.setValueAtTime(.08,t+.04); g2.gain.exponentialRampToValueAtTime(.001,t+.1); o2.start(t+.04);o2.stop(t+.12); }
+    if(type==='Fire'){ const o2=_actx.createOscillator(),g2=_actx.createGain(); o2.connect(g2);g2.connect(_masterGain); o2.type='sawtooth'; o2.frequency.value=110+Math.random()*40; g2.gain.setValueAtTime(.06,t+.06); g2.gain.exponentialRampToValueAtTime(.001,t+.16); o2.start(t+.06);o2.stop(t+.18); }
+  },
 };
 
 // ══════════════════════════════════════════════════════
@@ -220,9 +234,13 @@ const TC_COLOR={Normal:'#a8a878',Fire:'#e2621b',Water:'#4a90d9',Grass:'#5db85a',
 // ══════════════════════════════════════════════════════
 const MOVES={1:{id:1,name:'Tackle',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},2:{id:2,name:'Growl',type:'Normal',cat:'Status',power:0,acc:100,pp:40,eff:{k:'stat',stat:'atk',stg:-1,tgt:'foe'}},3:{id:3,name:'Vine Whip',type:'Grass',cat:'Physical',power:45,acc:100,pp:25},4:{id:4,name:'Leech Seed',type:'Grass',cat:'Status',power:0,acc:90,pp:10,eff:{k:'status',status:'leech'}},5:{id:5,name:'Razor Leaf',type:'Grass',cat:'Physical',power:55,acc:95,pp:25,hc:true},6:{id:6,name:'Sleep Powder',type:'Grass',cat:'Status',power:0,acc:75,pp:15,eff:{k:'status',status:'sleep'}},7:{id:7,name:'Scratch',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},8:{id:8,name:'Ember',type:'Fire',cat:'Special',power:40,acc:100,pp:25,eff:{k:'status',status:'burn',ch:10}},9:{id:9,name:'Smokescreen',type:'Normal',cat:'Status',power:0,acc:100,pp:20,eff:{k:'stat',stat:'acc',stg:-1,tgt:'foe'}},10:{id:10,name:'Flamethrower',type:'Fire',cat:'Special',power:90,acc:100,pp:15,eff:{k:'status',status:'burn',ch:10}},12:{id:12,name:'Tail Whip',type:'Normal',cat:'Status',power:0,acc:100,pp:30,eff:{k:'stat',stat:'def',stg:-1,tgt:'foe'}},13:{id:13,name:'Bubble',type:'Water',cat:'Special',power:40,acc:100,pp:30},14:{id:14,name:'Water Gun',type:'Water',cat:'Special',power:40,acc:100,pp:25},15:{id:15,name:'Surf',type:'Water',cat:'Special',power:90,acc:100,pp:15},17:{id:17,name:'Body Slam',type:'Normal',cat:'Physical',power:85,acc:100,pp:15,eff:{k:'status',status:'paralysis',ch:30}},18:{id:18,name:'Quick Attack',type:'Normal',cat:'Physical',power:40,acc:100,pp:30},19:{id:19,name:'ThunderShock',type:'Electric',cat:'Special',power:40,acc:100,pp:30,eff:{k:'status',status:'paralysis',ch:10}},20:{id:20,name:'Thunderbolt',type:'Electric',cat:'Special',power:90,acc:100,pp:15,eff:{k:'status',status:'paralysis',ch:10}},22:{id:22,name:'Ice Beam',type:'Ice',cat:'Special',power:90,acc:100,pp:10,eff:{k:'status',status:'freeze',ch:10}},24:{id:24,name:'Psychic',type:'Psychic',cat:'Special',power:90,acc:100,pp:10},25:{id:25,name:'Confusion',type:'Psychic',cat:'Special',power:50,acc:100,pp:25},26:{id:26,name:'Poison Sting',type:'Poison',cat:'Physical',power:15,acc:100,pp:35,eff:{k:'status',status:'poison',ch:30}},27:{id:27,name:'Sludge',type:'Poison',cat:'Special',power:65,acc:100,pp:20,eff:{k:'status',status:'poison',ch:30}},28:{id:28,name:'Earthquake',type:'Ground',cat:'Physical',power:100,acc:100,pp:10},29:{id:29,name:'String Shot',type:'Bug',cat:'Status',power:0,acc:95,pp:40,eff:{k:'stat',stat:'spd',stg:-2,tgt:'foe'}},30:{id:30,name:'Wing Attack',type:'Flying',cat:'Physical',power:60,acc:100,pp:35},31:{id:31,name:'Gust',type:'Flying',cat:'Special',power:40,acc:100,pp:35},32:{id:32,name:'Karate Chop',type:'Fighting',cat:'Physical',power:50,acc:100,pp:25,hc:true},33:{id:33,name:'Lick',type:'Ghost',cat:'Physical',power:30,acc:100,pp:30,eff:{k:'status',status:'paralysis',ch:30}},34:{id:34,name:'Rock Throw',type:'Rock',cat:'Physical',power:50,acc:90,pp:15},35:{id:35,name:'Peck',type:'Flying',cat:'Physical',power:35,acc:100,pp:35},36:{id:36,name:'Bite',type:'Dark',cat:'Physical',power:60,acc:100,pp:25},37:{id:37,name:'Leer',type:'Normal',cat:'Status',power:0,acc:100,pp:30,eff:{k:'stat',stat:'def',stg:-1,tgt:'foe'}},40:{id:40,name:'Splash',type:'Normal',cat:'Status',power:0,acc:100,pp:40},41:{id:41,name:'Acid',type:'Poison',cat:'Special',power:40,acc:100,pp:30},42:{id:42,name:'Headbutt',type:'Normal',cat:'Physical',power:70,acc:100,pp:15},43:{id:43,name:'Low Kick',type:'Fighting',cat:'Physical',power:65,acc:100,pp:20},44:{id:44,name:'Wrap',type:'Normal',cat:'Physical',power:15,acc:85,pp:20},45:{id:45,name:'Absorb',type:'Grass',cat:'Special',power:20,acc:100,pp:25,drain:true},46:{id:46,name:'Sing',type:'Normal',cat:'Status',power:0,acc:55,pp:15,eff:{k:'status',status:'sleep'}},47:{id:47,name:'Supersonic',type:'Normal',cat:'Status',power:0,acc:55,pp:20,eff:{k:'status',status:'confusion'}},48:{id:48,name:'Screech',type:'Normal',cat:'Status',power:0,acc:85,pp:40,eff:{k:'stat',stat:'def',stg:-2,tgt:'foe'}},49:{id:49,name:'Sand Attack',type:'Ground',cat:'Status',power:0,acc:100,pp:15,eff:{k:'stat',stat:'acc',stg:-1,tgt:'foe'}},50:{id:50,name:'Bone Club',type:'Ground',cat:'Physical',power:65,acc:85,pp:20},51:{id:51,name:'Pound',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},52:{id:52,name:'Nuzzle',type:'Electric',cat:'Physical',power:20,acc:100,pp:20,eff:{k:'status',status:'paralysis',ch:100}},53:{id:53,name:'Dig',type:'Ground',cat:'Physical',power:80,acc:100,pp:10}};
 
-const PDB={1:{id:1,name:'Bulbasaur',types:['Grass','Poison'],bs:{hp:45,atk:49,def:45,spa:65,spd:65,spe:45},moves:[1,2,3,4],cr:45,xp:64},4:{id:4,name:'Charmander',types:['Fire'],bs:{hp:39,atk:52,def:43,spa:60,spd:50,spe:65},moves:[7,2,8,9],cr:45,xp:62},7:{id:7,name:'Squirtle',types:['Water'],bs:{hp:44,atk:48,def:65,spa:50,spd:64,spe:43},moves:[1,12,13,14],cr:45,xp:63},10:{id:10,name:'Caterpie',types:['Bug'],bs:{hp:45,atk:30,def:35,spa:20,spd:20,spe:45},moves:[1,29],cr:255,xp:39},13:{id:13,name:'Weedle',types:['Bug','Poison'],bs:{hp:40,atk:35,def:30,spa:20,spd:20,spe:50},moves:[26,29],cr:255,xp:39},16:{id:16,name:'Pidgey',types:['Normal','Flying'],bs:{hp:40,atk:45,def:40,spa:35,spd:35,spe:56},moves:[1,31,35],cr:255,xp:50},19:{id:19,name:'Rattata',types:['Normal'],bs:{hp:30,atk:56,def:35,spa:25,spd:35,spe:72},moves:[1,12,36],cr:255,xp:51},23:{id:23,name:'Ekans',types:['Poison'],bs:{hp:35,atk:60,def:44,spa:40,spd:54,spe:55},moves:[44,37,26,27],cr:255,xp:58},25:{id:25,name:'Pikachu',types:['Electric'],bs:{hp:35,atk:55,def:40,spa:50,spd:50,spe:90},moves:[52,2,18,19],cr:190,xp:112},35:{id:35,name:'Clefairy',types:['Normal'],bs:{hp:70,atk:45,def:48,spa:60,spd:65,spe:35},moves:[51,2,1,17],cr:150,xp:113},37:{id:37,name:'Vulpix',types:['Fire'],bs:{hp:38,atk:41,def:40,spa:50,spd:65,spe:65},moves:[8,12,18,10],cr:190,xp:60},39:{id:39,name:'Jigglypuff',types:['Normal'],bs:{hp:115,atk:45,def:20,spa:45,spd:25,spe:20},moves:[46,51,1],cr:170,xp:76},41:{id:41,name:'Zubat',types:['Poison','Flying'],bs:{hp:40,atk:45,def:35,spa:30,spd:40,spe:55},moves:[33,47],cr:255,xp:54},43:{id:43,name:'Oddish',types:['Grass','Poison'],bs:{hp:45,atk:50,def:55,spa:75,spd:65,spe:30},moves:[51,41,6],cr:255,xp:64},46:{id:46,name:'Paras',types:['Bug','Grass'],bs:{hp:35,atk:70,def:55,spa:45,spd:55,spe:25},moves:[7,29,26,45],cr:190,xp:70},50:{id:50,name:'Diglett',types:['Ground'],bs:{hp:10,atk:55,def:25,spa:35,spd:45,spe:95},moves:[7,49,53],cr:255,xp:81},52:{id:52,name:'Meowth',types:['Normal'],bs:{hp:40,atk:45,def:35,spa:40,spd:40,spe:90},moves:[7,2,36,18],cr:255,xp:69},54:{id:54,name:'Psyduck',types:['Water'],bs:{hp:50,atk:52,def:48,spa:65,spd:50,spe:55},moves:[7,25,14],cr:190,xp:80},56:{id:56,name:'Mankey',types:['Fighting'],bs:{hp:40,atk:80,def:35,spa:35,spd:45,spe:70},moves:[7,37,43,32],cr:190,xp:74},60:{id:60,name:'Poliwag',types:['Water'],bs:{hp:40,atk:50,def:40,spa:40,spd:40,spe:90},moves:[14,42,15],cr:255,xp:60},63:{id:63,name:'Abra',types:['Psychic'],bs:{hp:25,atk:20,def:15,spa:105,spd:55,spe:90},moves:[25,24],cr:200,xp:73},74:{id:74,name:'Geodude',types:['Rock','Ground'],bs:{hp:40,atk:80,def:100,spa:30,spd:30,spe:20},moves:[1,34,28],cr:255,xp:73},92:{id:92,name:'Gastly',types:['Ghost','Poison'],bs:{hp:30,atk:35,def:30,spa:100,spd:35,spe:80},moves:[33,25,47],cr:190,xp:95},100:{id:100,name:'Voltorb',types:['Electric'],bs:{hp:40,atk:30,def:50,spa:55,spd:55,spe:100},moves:[19,48,17,20],cr:190,xp:66},104:{id:104,name:'Cubone',types:['Ground'],bs:{hp:50,atk:50,def:95,spa:40,spd:50,spe:35},moves:[1,34,50],cr:190,xp:87},109:{id:109,name:'Koffing',types:['Poison'],bs:{hp:40,atk:65,def:95,spa:60,spd:45,spe:35},moves:[1,27,48,41],cr:190,xp:114},129:{id:129,name:'Magikarp',types:['Water'],bs:{hp:20,atk:10,def:55,spa:15,spd:20,spe:80},moves:[40],cr:255,xp:20}};
+const PDB={1:{id:1,name:'Bulbasaur',types:['Grass','Poison'],bs:{hp:45,atk:49,def:45,spa:65,spd:65,spe:45},moves:[1,2,3,4],cr:45,xp:64},4:{id:4,name:'Charmander',types:['Fire'],bs:{hp:39,atk:52,def:43,spa:60,spd:50,spe:65},moves:[7,2,8,9],cr:45,xp:62},7:{id:7,name:'Squirtle',types:['Water'],bs:{hp:44,atk:48,def:65,spa:50,spd:64,spe:43},moves:[1,12,13,14],cr:45,xp:63},10:{id:10,name:'Caterpie',types:['Bug'],bs:{hp:45,atk:30,def:35,spa:20,spd:20,spe:45},moves:[1,29],cr:255,xp:39},13:{id:13,name:'Weedle',types:['Bug','Poison'],bs:{hp:40,atk:35,def:30,spa:20,spd:20,spe:50},moves:[26,29],cr:255,xp:39},16:{id:16,name:'Pidgey',types:['Normal','Flying'],bs:{hp:40,atk:45,def:40,spa:35,spd:35,spe:56},moves:[1,31,35],cr:255,xp:50},19:{id:19,name:'Rattata',types:['Normal'],bs:{hp:30,atk:56,def:35,spa:25,spd:35,spe:72},moves:[1,12,36],cr:255,xp:51},23:{id:23,name:'Ekans',types:['Poison'],bs:{hp:35,atk:60,def:44,spa:40,spd:54,spe:55},moves:[44,37,26,27],cr:255,xp:58},25:{id:25,name:'Pikachu',types:['Electric'],bs:{hp:35,atk:55,def:40,spa:50,spd:50,spe:90},moves:[52,2,18,19],cr:190,xp:112},35:{id:35,name:'Clefairy',types:['Normal'],bs:{hp:70,atk:45,def:48,spa:60,spd:65,spe:35},moves:[51,2,1,17],cr:150,xp:113},37:{id:37,name:'Vulpix',types:['Fire'],bs:{hp:38,atk:41,def:40,spa:50,spd:65,spe:65},moves:[8,12,18,10],cr:190,xp:60},39:{id:39,name:'Jigglypuff',types:['Normal'],bs:{hp:115,atk:45,def:20,spa:45,spd:25,spe:20},moves:[46,51,1],cr:170,xp:76},41:{id:41,name:'Zubat',types:['Poison','Flying'],bs:{hp:40,atk:45,def:35,spa:30,spd:40,spe:55},moves:[33,47],cr:255,xp:54},43:{id:43,name:'Oddish',types:['Grass','Poison'],bs:{hp:45,atk:50,def:55,spa:75,spd:65,spe:30},moves:[51,41,6],cr:255,xp:64},46:{id:46,name:'Paras',types:['Bug','Grass'],bs:{hp:35,atk:70,def:55,spa:45,spd:55,spe:25},moves:[7,29,26,45],cr:190,xp:70},50:{id:50,name:'Diglett',types:['Ground'],bs:{hp:10,atk:55,def:25,spa:35,spd:45,spe:95},moves:[7,49,53],cr:255,xp:81},52:{id:52,name:'Meowth',types:['Normal'],bs:{hp:40,atk:45,def:35,spa:40,spd:40,spe:90},moves:[7,2,36,18],cr:255,xp:69},54:{id:54,name:'Psyduck',types:['Water'],bs:{hp:50,atk:52,def:48,spa:65,spd:50,spe:55},moves:[7,25,14],cr:190,xp:80},56:{id:56,name:'Mankey',types:['Fighting'],bs:{hp:40,atk:80,def:35,spa:35,spd:45,spe:70},moves:[7,37,43,32],cr:190,xp:74},60:{id:60,name:'Poliwag',types:['Water'],bs:{hp:40,atk:50,def:40,spa:40,spd:40,spe:90},moves:[14,42,15],cr:255,xp:60},63:{id:63,name:'Abra',types:['Psychic'],bs:{hp:25,atk:20,def:15,spa:105,spd:55,spe:90},moves:[25,24],cr:200,xp:73},74:{id:74,name:'Geodude',types:['Rock','Ground'],bs:{hp:40,atk:80,def:100,spa:30,spd:30,spe:20},moves:[1,34,28],cr:255,xp:73},92:{id:92,name:'Gastly',types:['Ghost','Poison'],bs:{hp:30,atk:35,def:30,spa:100,spd:35,spe:80},moves:[33,25,47],cr:190,xp:95},100:{id:100,name:'Voltorb',types:['Electric'],bs:{hp:40,atk:30,def:50,spa:55,spd:55,spe:100},moves:[19,48,17,20],cr:190,xp:66},104:{id:104,name:'Cubone',types:['Ground'],bs:{hp:50,atk:50,def:95,spa:40,spd:50,spe:35},moves:[1,34,50],cr:190,xp:87},109:{id:109,name:'Koffing',types:['Poison'],bs:{hp:40,atk:65,def:95,spa:60,spd:45,spe:35},moves:[1,27,48,41],cr:190,xp:114},129:{id:129,name:'Magikarp',types:['Water'],bs:{hp:20,atk:10,def:55,spa:15,spd:20,spe:80},moves:[40],cr:255,xp:20},
+144:{id:144,name:'Articuno',types:['Ice','Flying'],bs:{hp:90,atk:85,def:100,spa:95,spd:125,spe:85},moves:[22,30,17,6],cr:3,xp:261},
+145:{id:145,name:'Zapdos',types:['Electric','Flying'],bs:{hp:90,atk:90,def:85,spa:125,spd:90,spe:100},moves:[20,30,19,48],cr:3,xp:261},
+146:{id:146,name:'Moltres',types:['Fire','Flying'],bs:{hp:90,atk:100,def:90,spa:125,spd:85,spe:90},moves:[10,30,8,17],cr:3,xp:261},
+150:{id:150,name:'Mewtwo',types:['Psychic'],bs:{hp:106,atk:110,def:90,spa:154,spd:90,spe:130},moves:[24,25,17,36],cr:3,xp:306}};
 
-const AREAS={'Route 1':{min:2,max:5,unlock:1,enc:[{d:16,w:45},{d:19,w:45},{d:10,w:5},{d:13,w:5}]},'Viridian Forest':{min:4,max:9,unlock:5,enc:[{d:10,w:30},{d:13,w:30},{d:16,w:20},{d:25,w:15},{d:46,w:5}]},'Mt. Moon':{min:8,max:14,unlock:10,enc:[{d:41,w:40},{d:74,w:30},{d:35,w:20},{d:46,w:10}]},'Cerulean Route':{min:14,max:22,unlock:15,enc:[{d:54,w:30},{d:60,w:30},{d:129,w:20},{d:39,w:15},{d:63,w:5}]},'Power Plant':{min:24,max:35,unlock:25,enc:[{d:100,w:40},{d:25,w:30},{d:52,w:20},{d:63,w:10}]}};
+const AREAS={'Route 1':{min:2,max:5,unlock:1,enc:[{d:16,w:45},{d:19,w:45},{d:10,w:5},{d:13,w:5}]},'Viridian Forest':{min:4,max:9,unlock:1,enc:[{d:10,w:30},{d:13,w:30},{d:16,w:20},{d:25,w:15},{d:46,w:5}]},'Mt. Moon':{min:8,max:14,unlock:1,enc:[{d:41,w:40},{d:74,w:30},{d:35,w:20},{d:46,w:10}]},'Cerulean Route':{min:14,max:22,unlock:1,enc:[{d:54,w:30},{d:60,w:30},{d:129,w:20},{d:39,w:15},{d:63,w:5}]},'Power Plant':{min:24,max:35,unlock:1,enc:[{d:100,w:40},{d:25,w:30},{d:52,w:20},{d:63,w:10}]}};
 
 const BATTLE_BG={
   'Route 1':       {sky:'#5baee0',skyH:.52,ground:'#4a8c2a',horizon:'#72b83a',sun:'#fff9c4',moon:false,clouds:true,stars:false},
@@ -239,10 +257,11 @@ const G = {
   screen: 'title',
   playerName: '',
   party: [],
-  bag: { pokeballs: 5, potions: 2, gold: 500 },
+  bag: { pokeballs: 15, potions: 5, gold: 10000 },
   area: 'Route 1',
   battle: null,
   modal: null,
+  caught: {},  // {dexId: true} for legendaries already caught/defeated
 };
 
 // ══════════════════════════════════════════════════════
@@ -298,8 +317,8 @@ function tbadge(t){return`<span class="type-badge" style="background:${TC_COLOR[
 function sbadge(s){return s?`<span class="status-badge" style="background:${SCLR[s]||'#888'}">${SLBL[s]||''}</span>`:''}
 function spr(id,front=true){return front?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`:`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`;}
 
-function saveGame(){try{localStorage.setItem('pkm2',JSON.stringify({playerName:G.playerName,party:G.party,bag:G.bag,area:G.area,owX:OW.player.tx,owY:OW.player.ty}));}catch(e){}}
-function loadGame(){try{const d=JSON.parse(localStorage.getItem('pkm2')||'null');if(!d)return false;G.playerName=d.playerName;G.party=d.party;G.bag=d.bag||{pokeballs:5,potions:2,gold:500};G.area=d.area||'Route 1';if(d.owX)OW.player.tx=d.owX;if(d.owY)OW.player.ty=d.owY;return true;}catch(e){return false;}}
+function saveGame(){try{localStorage.setItem('pkm2',JSON.stringify({playerName:G.playerName,party:G.party,bag:G.bag,area:G.area,owX:OW.player.tx,owY:OW.player.ty,caught:G.caught}));}catch(e){}}
+function loadGame(){try{const d=JSON.parse(localStorage.getItem('pkm2')||'null');if(!d)return false;G.playerName=d.playerName;G.party=d.party;G.bag=d.bag||{pokeballs:15,potions:5,gold:10000};G.area=d.area||'Route 1';G.caught=d.caught||{};if(d.owX!=null)OW.player.tx=d.owX;if(d.owY!=null)OW.player.ty=d.owY;return true;}catch(e){return false;}}
 function hasSave(){return!!localStorage.getItem('pkm2');}
 function healAll(){G.party=G.party.map(p=>({...p,hp:p.stats.hp,status:null,stTurns:0,moves:p.moves.map(m=>({...m,cur:m.pp}))}));}
 function deepClone(o){return JSON.parse(JSON.stringify(o));}
@@ -331,7 +350,15 @@ const MAP_COLS = 16, MAP_ROWS = 14;
 
 const NPCS = [
   {tx:5,ty:5,color:'#e060e0',dir:'right',name:'Rosa',lines:['Wild Pokemon live in the tall grass!','The Pokemon Center heals your team for free!']},
-  {tx:9,ty:5,color:'#60a0e0',dir:'left',name:'Lucas',lines:['I heard Pikachu lives in Viridian Forest!','Level up your team to unlock new areas.']},
+  {tx:9,ty:5,color:'#60a0e0',dir:'left',name:'Lucas',lines:['Legendary Pokemon roam the tall grass to the south!','Approach them carefully — they are incredibly powerful!']},
+];
+
+// Legendary Pokemon on the overworld map
+const LEGENDARIES = [
+  {dexId:144,lv:50,tx:2, ty:10,glow:'#98d8d8',label:'❄'},
+  {dexId:145,lv:50,tx:12,ty:9, glow:'#f8e800',label:'⚡'},
+  {dexId:146,lv:50,tx:7, ty:12,glow:'#ff8800',label:'🔥'},
+  {dexId:150,lv:70,tx:4, ty:11,glow:'#cc88ff',label:'★'},
 ];
 
 // ══════════════════════════════════════════════════════
@@ -392,8 +419,9 @@ function owTryMove(dx, dy) {
 }
 
 function owEnterPC() {
+  if (OW.dialogData) return;
   healAll(); SFX.heal(); saveGame();
-  owShowDialog('POKEMON CENTER', ['Welcome!','Your Pokemon have been healed to full health.','Progress saved ✓'], null, ()=>owCloseDialog());
+  owShowDialog('POKEMON CENTER', ['Welcome! Your Pokemon have been healed to full health!','Progress saved ✓  Come back anytime.'], null, ()=>owCloseDialog());
 }
 
 function owUpdate() {
@@ -417,17 +445,27 @@ function owUpdate() {
 }
 
 function owOnArrive() {
-  // Auto-save every 15 steps
   if (OW.player.walkCycle % 15 === 0) saveGame();
-  const t = owTile(OW.player.tx, OW.player.ty);
-  if (t===1 && Math.random()<0.2) { // 20% encounter in tall grass
+  const tx=OW.player.tx, ty=OW.player.ty;
+  // Legendary encounter
+  for (const leg of LEGENDARIES) {
+    if (leg.tx===tx && leg.ty===ty && !G.caught[leg.dexId]) {
+      owStop();
+      SFX.legendary();
+      const wild = createMon(leg.dexId, leg.lv);
+      wild.cr = 5; // slightly easier to catch
+      G.battle = {wild, party:G.party.map(deepClone), activeIdx:G.party.findIndex(p=>p.hp>0), escAttempts:0, endResult:null, msgs:[], msgIdx:0, phase:'reading', pendingPhase:'menu', isLegendary:true};
+      G.battle.msgs = [`✨ A wild ${wild.name} appeared! ✨`, `This is a legendary encounter!`, `It's incredibly powerful!`];
+      G.screen = 'battle'; playMusic('battle'); render(); return;
+    }
+  }
+  const t = owTile(tx, ty);
+  if (t===1 && Math.random()<0.2) {
     owStop();
     const wild = randEnc(G.area);
-    G.battle = {wild, party: G.party.map(deepClone), activeIdx: G.party.findIndex(p=>p.hp>0), escAttempts:0, endResult:null, msgs:[], msgIdx:0, phase:'reading', pendingPhase:'menu'};
+    G.battle = {wild, party:G.party.map(deepClone), activeIdx:G.party.findIndex(p=>p.hp>0), escAttempts:0, endResult:null, msgs:[], msgIdx:0, phase:'reading', pendingPhase:'menu'};
     G.battle.msgs = [`A wild ${wild.name} appeared!`];
-    G.screen = 'battle';
-    playMusic('battle');
-    render();
+    G.screen = 'battle'; playMusic('battle'); render();
   }
 }
 
@@ -510,6 +548,13 @@ function owDraw() {
   for (const n of NPCS) {
     const sx = n.tx*ts - camX, sy = n.ty*ts - camY;
     if (sx>-ts&&sx<c.width&&sy>-ts&&sy<c.height) drawNPC(ctx, n, sx, sy, ts);
+  }
+
+  // Draw legendaries
+  for (const leg of LEGENDARIES) {
+    if (G.caught[leg.dexId]) continue;
+    const sx=leg.tx*ts-camX, sy=leg.ty*ts-camY;
+    if (sx>-ts&&sx<c.width&&sy>-ts&&sy<c.height) drawLegendary(ctx, leg, sx, sy, ts);
   }
 
   // Draw player
@@ -708,6 +753,36 @@ function drawNPC(ctx, npc, sx, sy, ts) {
   ctx.fillText('!',cx,cy-22*s);
 }
 
+function drawLegendary(ctx, leg, sx, sy, ts) {
+  const cx=sx+ts/2, cy=sy+ts/2, s=ts/40;
+  const t=Date.now()/1000;
+  const pulse=0.85+0.15*Math.sin(t*2.2);
+  const r=ts*.38*pulse;
+  // Outer aura
+  const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,r*1.6);
+  grad.addColorStop(0,leg.glow+'cc');
+  grad.addColorStop(.5,leg.glow+'55');
+  grad.addColorStop(1,'transparent');
+  ctx.fillStyle=grad;
+  ctx.beginPath(); ctx.arc(cx,cy,r*1.6,0,Math.PI*2); ctx.fill();
+  // Sprite circle
+  ctx.fillStyle=leg.glow+'88';
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle=leg.glow; ctx.lineWidth=2.5*pulse;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+  // Label
+  ctx.font=`bold ${ts*.38}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='#fff'; ctx.globalAlpha=pulse;
+  ctx.fillText(leg.label,cx,cy);
+  ctx.globalAlpha=1;
+  // Name
+  ctx.font=`bold ${ts*.17}px sans-serif`; ctx.textBaseline='alphabetic';
+  ctx.fillStyle='#fff';
+  ctx.strokeStyle='rgba(0,0,0,.8)'; ctx.lineWidth=3;
+  ctx.strokeText(PDB[leg.dexId].name,cx,sy-4);
+  ctx.fillText(PDB[leg.dexId].name,cx,sy-4);
+}
+
 // ══════════════════════════════════════════════════════
 //  RENDER ENGINE
 // ══════════════════════════════════════════════════════
@@ -768,8 +843,9 @@ function mountOW(container) {
 
   const canvas = document.getElementById('ow-canvas');
   const wrap = document.getElementById('ow-wrap');
-  canvas.width = wrap.offsetWidth;
-  canvas.height = wrap.offsetHeight;
+  const app = document.getElementById('app');
+  canvas.width  = wrap.offsetWidth  || app.offsetWidth  || Math.min(480, window.innerWidth);
+  canvas.height = wrap.offsetHeight || app.offsetHeight || window.innerHeight;
   OW.canvas = canvas; OW.ctx = canvas.getContext('2d');
   OW.ts = Math.min(48, Math.floor(canvas.width / 9));
   owInit();
@@ -812,15 +888,34 @@ function renderTitle(){
 let _starterChosen=null;
 function renderName(){return`<div class="screen" style="justify-content:center;gap:20px"><div style="text-align:center"><div class="gold" style="font-size:24px;font-weight:800">What's your name?</div><div style="color:#aaa;font-size:13px;margin-top:6px">Professor Oak needs to know!</div></div><input id="nameIn" type="text" maxlength="12" placeholder="Trainer name" style="background:#0d0d1f;border:2px solid #4466bb;border-radius:10px;padding:14px 16px;color:#fff;font-size:18px;width:100%;outline:none" value="${G.playerName||''}"/><button class="btn-red" onclick="navGo('nameNext')">NEXT →</button></div>`;}
 
+const ALL_STARTERS=[
+  {id:1, col:'#5db85a',t:'Grass/Poison',d:'Steady. Leech Seed + status control.'},
+  {id:4, col:'#e2621b',t:'Fire',        d:'Fast attacker. Burns opponents.'},
+  {id:7, col:'#4a90d9',t:'Water',       d:'Tough defender. Great coverage.'},
+  {id:25,col:'#f8c800',t:'Electric',    d:'Super fast. Paralyzes foes.'},
+  {id:63,col:'#f85888',t:'Psychic',     d:'Master of mind. Devastating Sp.Atk.'},
+  {id:92,col:'#705898',t:'Ghost/Poison',d:'Spooky. Hard to hit, hard to stop.'},
+  {id:56,col:'#c03028',t:'Fighting',    d:'Raw power. Breaks through defenses.'},
+  {id:37,col:'#e2621b',t:'Fire',        d:'Cunning fox. Fire and speed combo.'},
+  {id:54,col:'#4a90d9',t:'Water',       d:'Confused but powerful Sp.Atk.'},
+  {id:43,col:'#5db85a',t:'Grass/Poison',d:'Absorb + Sleep Powder specialist.'},
+  {id:104,col:'#e0c068',t:'Ground',     d:'High Def. Bone Club hits hard.'},
+  {id:50,col:'#e0c068',t:'Ground',      d:'Blazing Speed. Earthquake master.'},
+  {id:60,col:'#4a90d9',t:'Water',       d:'Swift swimmer. Powerful Surf.'},
+  {id:39,col:'#f888c8',t:'Normal',      d:'Huge HP pool. Sings foes to sleep.'},
+  {id:129,col:'#4a90d9',t:'Water',      d:'🐟 Ultimate challenge. Legend tier.'},
+];
+
 function renderStarter(){
-  const starters=[{id:1,name:'Bulbasaur',col:'#5db85a',t:'Grass / Poison',d:'Steady grower. Leech Seed + status control.'},{id:4,name:'Charmander',col:'#e2621b',t:'Fire',d:'Fast attacker. Burns opponents hard.'},{id:7,name:'Squirtle',col:'#4a90d9',t:'Water',d:'Tough defender. Great type coverage.'}];
-  return`<div class="screen" style="gap:14px"><div style="text-align:center"><div class="gold" style="font-size:22px;font-weight:800">Choose Your Starter!</div><div style="color:#aaa;font-size:13px">The Pokemon that begins your journey.</div></div>
-  ${starters.map(s=>`<div onclick="chooseStarter(${s.id})" style="background:#141428;border-radius:14px;border:${_starterChosen===s.id?`3px solid ${s.col}`:' 2px solid #333'};padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;${_starterChosen===s.id?'background:#2a2a45':''}">
-    <img src="${spr(s.id)}" width="72" height="72" style="image-rendering:pixelated">
-    <div style="flex:1"><div style="font-size:19px;font-weight:800;color:${s.col}">${s.name}</div><div style="margin:4px 0">${s.t.split(' / ').map(t=>tbadge(t)).join('')}</div><div style="color:#ccc;font-size:12px">${s.d}</div></div>
-    ${_starterChosen===s.id?'<span style="font-size:22px;color:#44dd44">✓</span>':''}
+  return`<div class="screen" style="gap:10px">
+  <div style="text-align:center;flex-shrink:0"><div class="gold" style="font-size:22px;font-weight:800">Choose Your Starter!</div><div style="color:#aaa;font-size:12px">Scroll to see all 15 options. You start with 💰10,000g and all areas unlocked!</div></div>
+  ${ALL_STARTERS.map(s=>`<div onclick="chooseStarter(${s.id})" style="background:${_starterChosen===s.id?'#1e2a48':'#141428'};border-radius:12px;border:${_starterChosen===s.id?`2px solid ${s.col}`:'1px solid #2a2a45'};padding:10px;display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0">
+    <img src="${spr(s.id)}" width="56" height="56" style="image-rendering:pixelated;flex-shrink:0">
+    <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:800;color:${s.col}">${PDB[s.id].name}</div><div style="margin:2px 0">${s.t.split('/').map(t=>tbadge(t.trim())).join('')}</div><div style="color:#bbb;font-size:11px">${s.d}</div></div>
+    ${_starterChosen===s.id?'<span style="font-size:20px;color:#44dd44;flex-shrink:0">✓</span>':''}
   </div>`).join('')}
-  <button class="${_starterChosen?'btn-red':'btn-disabled'}" onclick="navGo('startGame')" ${_starterChosen?'':'disabled'}>START ADVENTURE →</button></div>`;
+  <button class="${_starterChosen?'btn-red':'btn-disabled'}" style="flex-shrink:0;margin-top:4px" onclick="navGo('startGame')" ${_starterChosen?'':'disabled'}>START ADVENTURE →</button>
+  </div>`;
 }
 
 function renderBattle(){
@@ -864,20 +959,29 @@ function renderBattle(){
     ?`<div class="move-list"><div style="color:#f8c800;font-weight:800;margin-bottom:6px">Switch Pokemon</div>${b.party.map((m,i)=>`<div class="move-btn${m.hp===0?' depleted':''}" onclick="bSwitch(${i})" style="${i===b.activeIdx?'border-color:#f8c800':''}"><div style="display:flex;align-items:center;gap:8px"><img src="${spr(m.dexId)}" width="32" height="32" style="image-rendering:pixelated"><div><div style="color:#fff;font-weight:700">${m.name} Lv${m.lv}</div><div style="color:${hpColor(m)};font-size:11px">${m.hp}/${m.stats.hp} HP</div></div></div>${i===b.activeIdx?'<span class="gold">●</span>':''}</div>`).join('')}<button class="btn-dark" style="margin-top:4px;padding:8px" onclick="bPhase('menu')">← BACK</button></div>`
     :`<div class="msg-box"><div class="msg-text">...</div></div>`;
 
+  // Hit effect overlays
+  const eff=b.effect||{};
+  const wildSz=Math.round(sceneH*.35), playerSz=Math.round(sceneH*.38);
+  const wildEffEl=eff.wildType?`<div style="position:absolute;top:${Math.round(sceneH*.05)}px;right:10px;width:${wildSz}px;height:${wildSz}px;border-radius:50%;background:${TC_COLOR[eff.wildType]||'#fff'};opacity:.7;pointer-events:none;animation:hitPop .4s ease-out forwards"></div>`:'';
+  const playerEffEl=eff.playerType?`<div style="position:absolute;bottom:0;left:10px;width:${playerSz}px;height:${playerSz}px;border-radius:50%;background:${TC_COLOR[eff.playerType]||'#fff'};opacity:.7;pointer-events:none;animation:hitPop .4s ease-out forwards"></div>`:'';
+  const legendaryBorder=b.isLegendary?`border:3px solid #f8c800;box-shadow:0 0 20px #f8c80088;`:'';
+
   return`<div class="battle-wrap">
-    <div class="battle-scene" style="${bgStyle}height:${sceneH}px">
+    <div class="battle-scene" style="${bgStyle}height:${sceneH}px;${legendaryBorder}">
       ${starsEl}${sunEl}${cloudEl}${groundShade}
       <!-- Wild Pokemon top-right -->
-      <div style="position:absolute;top:${sceneH*.05}px;right:10px">
-        <img id="wild-spr" src="${spr(w.dexId,true)}" width="${Math.round(sceneH*.35)}" height="${Math.round(sceneH*.35)}" style="image-rendering:pixelated;filter:drop-shadow(2px 4px 4px rgba(0,0,0,.4))">
+      <div style="position:absolute;top:${sceneH*.05}px;right:10px;${eff.wildType?'animation:shake .4s':''}">
+        <img id="wild-spr" src="${spr(w.dexId,true)}" width="${wildSz}" height="${wildSz}" style="image-rendering:pixelated;filter:drop-shadow(2px 4px 4px rgba(0,0,0,.4))">
       </div>
+      ${wildEffEl}
       <!-- Player Pokemon bottom-left -->
-      <div style="position:absolute;bottom:${sceneH*.0}px;left:10px">
-        <img src="${spr(p.dexId,false)}" width="${Math.round(sceneH*.38)}" height="${Math.round(sceneH*.38)}" style="image-rendering:pixelated;filter:drop-shadow(-2px 4px 4px rgba(0,0,0,.4))">
+      <div style="position:absolute;bottom:${sceneH*.0}px;left:10px;${eff.playerType?'animation:shake .4s':''}">
+        <img src="${spr(p.dexId,false)}" width="${playerSz}" height="${playerSz}" style="image-rendering:pixelated;filter:drop-shadow(-2px 4px 4px rgba(0,0,0,.4))">
       </div>
+      ${playerEffEl}
       <!-- Wild info -->
-      <div class="battle-wild-info" style="min-width:140px">
-        <div style="display:flex;align-items:center;gap:4px"><span class="mon-name">${w.name}</span>${sbadge(w.status)}</div>
+      <div class="battle-wild-info" style="min-width:140px${b.isLegendary?';border:1px solid #f8c800':''}">
+        <div style="display:flex;align-items:center;gap:4px"><span class="mon-name">${b.isLegendary?'✨ ':''}${w.name}</span>${sbadge(w.status)}</div>
         <div class="mon-level">Lv.${w.lv}</div>
         <div style="display:flex;align-items:center;gap:4px;margin-top:2px"><span style="color:#555;font-size:10px;font-weight:700">HP</span><div style="flex:1;min-width:90px"><div class="hp-track"><div class="hp-fill" style="width:${hpPct(w)};background:${hpColor(w)}"></div></div></div></div>
         <div style="margin-top:3px">${w.types.map(t=>tbadge(t)).join('')}</div>
@@ -939,7 +1043,7 @@ function renderParty(){
 // ══════════════════════════════════════════════════════
 function navGo(action) {
   switch(action){
-    case 'new': G.playerName='';G.party=[];G.bag={pokeballs:5,potions:2,gold:500};G.area='Route 1';_starterChosen=null;OW.player={tx:7,ty:6,px:0,py:0,dir:'down',moving:false,stepF:0,walkCycle:0,targetTX:7,targetTY:6};G.screen='name';render();break;
+    case 'new': G.playerName='';G.party=[];G.bag={pokeballs:15,potions:5,gold:10000};G.area='Route 1';G.caught={};_starterChosen=null;OW.player={tx:7,ty:6,px:0,py:0,dir:'down',moving:false,stepF:0,walkCycle:0,targetTX:7,targetTY:6};G.screen='name';render();break;
     case 'continue': if(loadGame()){G.screen='overworld';render();}break;
     case 'nameNext':{const n=document.getElementById('nameIn');const v=(n&&n.value||G.playerName).trim();if(!v){alert('Please enter your name!');return;}G.playerName=v;G.screen='starter';_starterChosen=null;render();break;}
     case 'startGame': if(!_starterChosen)return;G.party=[createMon(_starterChosen,5)];saveGame();G.screen='overworld';render();break;
@@ -980,11 +1084,14 @@ function bEnd(){
   const b=G.battle;
   if(b.endResult==='caught'){
     const caught=deepClone(b.wild); caught.hp=Math.max(1,Math.floor(b.wild.stats.hp*.3)); caught.status=null;
+    G.caught[caught.dexId]=true;
     if(G.party.length<6) G.party.push(caught);
     else G.party=b.party.map(deepClone);
   } else if(b.endResult==='lost'){
     G.party=b.party.map(p=>({...p,hp:Math.max(1,Math.floor(p.stats.hp*.3)),status:null}));
   } else {
+    // Fled or defeated wild — mark legendary as gone
+    if(b.isLegendary) G.caught[b.wild.dexId]='fled';
     G.party=b.party.map(deepClone);
   }
   saveGame(); G.battle=null; G.screen='overworld';
@@ -1027,6 +1134,12 @@ function execMove(atk,def,move,msgs){
 
 function pickWildMove(mon){const u=mon.moves.filter(m=>m.cur>0);return(u.length?u:mon.moves)[Math.floor(Math.random()*(u.length||mon.moves.length))];}
 
+function bShowEffect(wildType, playerType) {
+  const b=G.battle; if(!b)return;
+  b.effect={wildType,playerType}; render();
+  setTimeout(()=>{ if(G.battle){G.battle.effect=null;} },420);
+}
+
 function bMove(moveId){
   const b=G.battle; if(!b||b.phase!=='fight')return;
   const p=b.party[b.activeIdx], move=p.moves.find(m=>m.id===moveId);
@@ -1034,7 +1147,7 @@ function bMove(moveId){
   SFX.select();
   const msgs=[], w=b.wild;
   execMove(p,w,move,msgs);
-  if(move.cat!=='Status') SFX.hit();
+  if(move.cat!=='Status'){ SFX.typeHit(move.type); }
   if(w.hp<=0){
     msgs.push(`${w.name} fainted!`);
     const xpGained=Math.max(1,Math.floor((w.xpY*w.lv)/7));
@@ -1052,7 +1165,7 @@ function bMove(moveId){
   }
   // Wild turn
   const wm=pickWildMove(w); execMove(w,p,wm,msgs);
-  if(wm.cat!=='Status') SFX.hit();
+  if(wm.cat!=='Status'){ SFX.typeHit(wm.type); }
   msgs.push(...eotDmg(p)); msgs.push(...eotDmg(w));
   if(p.hp<=0){
     msgs.push(`${p.name} fainted!`);
