@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#1a3a1a">
 <title>Pokemon Adventure</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
 html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;touch-action:none}
 #app{width:100%;height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;overflow:hidden}
 button{cursor:pointer;border:none;font-family:inherit;font-size:16px;font-weight:700;border-radius:12px;padding:14px 20px;width:100%;-webkit-appearance:none;transition:opacity .08s}
@@ -225,11 +225,11 @@ const PDB={1:{id:1,name:'Bulbasaur',types:['Grass','Poison'],bs:{hp:45,atk:49,de
 const AREAS={'Route 1':{min:2,max:5,unlock:1,enc:[{d:16,w:45},{d:19,w:45},{d:10,w:5},{d:13,w:5}]},'Viridian Forest':{min:4,max:9,unlock:5,enc:[{d:10,w:30},{d:13,w:30},{d:16,w:20},{d:25,w:15},{d:46,w:5}]},'Mt. Moon':{min:8,max:14,unlock:10,enc:[{d:41,w:40},{d:74,w:30},{d:35,w:20},{d:46,w:10}]},'Cerulean Route':{min:14,max:22,unlock:15,enc:[{d:54,w:30},{d:60,w:30},{d:129,w:20},{d:39,w:15},{d:63,w:5}]},'Power Plant':{min:24,max:35,unlock:25,enc:[{d:100,w:40},{d:25,w:30},{d:52,w:20},{d:63,w:10}]}};
 
 const BATTLE_BG={
-  'Route 1':    {sky:'#87ceeb',skyH:.55,ground:'#4a8c2a',groundH:.45,horizon:'#6ab040'},
-  'Viridian Forest':{sky:'#1a3a0a',skyH:.6,ground:'#1a4010',groundH:.4,horizon:'#2a5a1a'},
-  'Mt. Moon':   {sky:'#0a0a1a',skyH:.6,ground:'#2a2a3a',groundH:.4,horizon:'#1a1a2a'},
-  'Cerulean Route':{sky:'#4a90d9',skyH:.5,ground:'#2060a0',groundH:.5,horizon:'#3070b0'},
-  'Power Plant':{sky:'#1a1a1a',skyH:.6,ground:'#2a2040',groundH:.4,horizon:'#1a1830'},
+  'Route 1':       {sky:'#5baee0',skyH:.52,ground:'#4a8c2a',horizon:'#72b83a',sun:'#fff9c4',moon:false,clouds:true,stars:false},
+  'Viridian Forest':{sky:'#0d2406',skyH:.58,ground:'#163410',horizon:'#1c4412',sun:'#9ab8ff',moon:false,clouds:false,stars:true},
+  'Mt. Moon':      {sky:'#05050e',skyH:.58,ground:'#1c1c2c',horizon:'#101020',sun:'#dde8ff',moon:true,clouds:false,stars:true},
+  'Cerulean Route':{sky:'#3278c0',skyH:.50,ground:'#1a4880',horizon:'#2460a0',sun:'#fff176',moon:false,clouds:true,stars:false},
+  'Power Plant':   {sky:'#0c0c0c',skyH:.60,ground:'#1e1638',horizon:'#12102a',sun:'#ff8800',moon:false,clouds:false,stars:true},
 };
 
 // ══════════════════════════════════════════════════════
@@ -386,14 +386,14 @@ function owTryMove(dx, dy) {
   // Check building entry
   const t = owTile(nx,ny);
   if (t===8) { owEnterPC(); return; }
-  if (t===9) { G.screen='shop'; owStop(); render(); return; }
+  if (t===9) { saveGame(); G.screen='shop'; owStop(); render(); return; }
   OW.player.targetTX=nx; OW.player.targetTY=ny;
   OW.player.moving=true; OW.player.stepF=0;
 }
 
 function owEnterPC() {
-  healAll(); SFX.heal();
-  owShowDialog('POKEMON CENTER', ['Welcome!','Your Pokemon have been healed to full health.'], null, ()=>owCloseDialog());
+  healAll(); SFX.heal(); saveGame();
+  owShowDialog('POKEMON CENTER', ['Welcome!','Your Pokemon have been healed to full health.','Progress saved ✓'], null, ()=>owCloseDialog());
 }
 
 function owUpdate() {
@@ -417,6 +417,8 @@ function owUpdate() {
 }
 
 function owOnArrive() {
+  // Auto-save every 15 steps
+  if (OW.player.walkCycle % 15 === 0) saveGame();
   const t = owTile(OW.player.tx, OW.player.ty);
   if (t===1 && Math.random()<0.2) { // 20% encounter in tall grass
     owStop();
@@ -515,85 +517,113 @@ function owDraw() {
 }
 
 function drawTile(ctx, type, sx, sy, ts) {
-  const colors = {
-    0: '#c8a870', // path
-    1: '#2d8a2d', // tall grass
-    2: null,      // tree (special)
-    3: '#4480c8', // water
-    4: '#7a7a8a', // building
-    5: '#c8a870', // sign (path + sign drawn on top)
-    6: '#4aaa4a', // flower lawn
-    7: '#5aaa5a', // lawn
-    8: '#7a7a8a', // pokecenter door
-    9: '#7a7a8a', // shop door
-  };
-
-  // Base color
-  ctx.fillStyle = colors[type] || '#888';
+  // Base fill per type
+  const bases={0:'#c9a85c',1:'#2e8a2e',2:'#346034',3:'#2858b0',4:'#c8c8d8',5:'#c9a85c',6:'#4cb04c',7:'#58b858',8:'#d0c0d8',9:'#c0c0e0'};
+  ctx.fillStyle = bases[type] || '#888';
   ctx.fillRect(sx, sy, ts, ts);
 
-  if (type===2) {
-    // Grass under tree
-    ctx.fillStyle = '#3a7a3a';
-    ctx.fillRect(sx,sy,ts,ts);
-    // Trunk
-    ctx.fillStyle = '#7a5a30';
-    ctx.fillRect(sx+ts*.35,sy+ts*.55,ts*.3,ts*.45);
-    // Leaves
-    ctx.fillStyle = '#1a6a1a';
-    ctx.beginPath(); ctx.arc(sx+ts*.5,sy+ts*.35,ts*.38,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#2a8a2a';
-    ctx.beginPath(); ctx.arc(sx+ts*.4,sy+ts*.28,ts*.26,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(sx+ts*.62,sy+ts*.30,ts*.22,0,Math.PI*2); ctx.fill();
+  if (type===0) {
+    // Dirt path with texture
+    ctx.fillStyle='#d8b870'; ctx.fillRect(sx+1,sy+1,ts-2,ts-2);
+    ctx.fillStyle='rgba(100,70,20,.18)';
+    [[.18,.28],[.72,.18],[.42,.72],[.82,.58],[.12,.82],[.62,.38],[.52,.12]].forEach(([rx,ry])=>{
+      ctx.beginPath(); ctx.arc(sx+rx*ts,sy+ry*ts,ts*.045,0,Math.PI*2); ctx.fill();
+    });
+    ctx.fillStyle='rgba(255,255,255,.08)';
+    ctx.fillRect(sx,sy,ts,ts*.3);
+  } else if (type===7) {
+    // Lawn — bright green with subtle blades
+    ctx.fillStyle='#64c264'; ctx.fillRect(sx,sy,ts,ts);
+    ctx.fillStyle='rgba(50,160,50,.35)';
+    for(let i=0;i<5;i++){ ctx.fillRect(sx+ts*(.08+i*.18),sy+ts*.5,ts*.05,ts*.3); }
+    ctx.fillStyle='rgba(255,255,255,.07)'; ctx.fillRect(sx,sy,ts,ts*.25);
   } else if (type===1) {
-    // Tall grass blades
-    ctx.fillStyle = '#1a6a1a';
-    for (let i=0;i<4;i++) {
-      const bx = sx + ts*(.15+i*.2), by = sy+ts*.1;
-      ctx.fillRect(bx, by, ts*.07, ts*.5);
-    }
+    // Tall grass — layered blades
+    ctx.fillStyle='#267826'; ctx.fillRect(sx,sy,ts,ts);
+    ctx.fillStyle='#185018';
+    for(let i=0;i<5;i++){ const bx=sx+ts*(.06+i*.18); ctx.fillRect(bx,sy+ts*.06,ts*.1,ts*.62); }
+    ctx.fillStyle='#50c050';
+    for(let i=0;i<5;i++){ const bx=sx+ts*(.08+i*.18); ctx.fillRect(bx,sy+ts*.06,ts*.04,ts*.22); }
+    ctx.fillStyle='rgba(0,0,0,.12)'; ctx.fillRect(sx,sy+ts*.7,ts,ts*.3);
+  } else if (type===2) {
+    // Tree — multi-layer foliage
+    ctx.fillStyle='#2e6030'; ctx.fillRect(sx,sy,ts,ts);
+    // Trunk
+    ctx.fillStyle='#8a6228'; ctx.fillRect(sx+ts*.38,sy+ts*.55,ts*.24,ts*.45);
+    ctx.fillStyle='#a87840'; ctx.fillRect(sx+ts*.4,sy+ts*.58,ts*.1,ts*.38);
+    // Shadow under canopy
+    ctx.fillStyle='rgba(0,0,0,.22)';
+    ctx.beginPath(); ctx.ellipse(sx+ts*.5,sy+ts*.62,ts*.33,ts*.09,0,0,Math.PI*2); ctx.fill();
+    // Canopy layers (dark → bright)
+    ctx.fillStyle='#165016';
+    ctx.beginPath(); ctx.arc(sx+ts*.5,sy+ts*.4,ts*.39,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#267826';
+    ctx.beginPath(); ctx.arc(sx+ts*.5,sy+ts*.33,ts*.32,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#3a9a3a';
+    ctx.beginPath(); ctx.arc(sx+ts*.42,sy+ts*.26,ts*.24,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(sx+ts*.62,sy+ts*.29,ts*.18,0,Math.PI*2); ctx.fill();
+    // Top highlight
+    ctx.fillStyle='#52b852';
+    ctx.beginPath(); ctx.arc(sx+ts*.44,sy+ts*.2,ts*.14,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.12)';
+    ctx.beginPath(); ctx.arc(sx+ts*.4,sy+ts*.17,ts*.08,0,Math.PI*2); ctx.fill();
   } else if (type===3) {
-    // Water shimmer
-    ctx.fillStyle = '#5090d8';
-    ctx.fillRect(sx,sy,ts,ts*.5);
-    ctx.fillStyle = '#3a70b8';
-    ctx.fillRect(sx,sy+ts*.5,ts,ts*.5);
-    // Wave lines
-    ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.moveTo(sx+ts*.1,sy+ts*.3); ctx.bezierCurveTo(sx+ts*.3,sy+ts*.2,sx+ts*.6,sy+ts*.4,sx+ts*.9,sy+ts*.3); ctx.stroke();
+    // Water — gradient + waves
+    ctx.fillStyle='#1c50a8'; ctx.fillRect(sx,sy,ts,ts);
+    ctx.fillStyle='#2870c8'; ctx.fillRect(sx,sy,ts,ts*.55);
+    ctx.fillStyle='#3888d8'; ctx.fillRect(sx,sy,ts,ts*.2);
+    ctx.strokeStyle='rgba(255,255,255,.45)'; ctx.lineWidth=1.4; ctx.lineCap='round';
+    [[.05,.34,.28,.22,.58,.38,.95,.3],[.05,.65,.22,.55,.56,.68,.95,.6]].forEach(([x1,y1,x2,y2,x3,y3,x4,y4])=>{
+      ctx.beginPath(); ctx.moveTo(sx+ts*x1,sy+ts*y1); ctx.bezierCurveTo(sx+ts*x2,sy+ts*y2,sx+ts*x3,sy+ts*y3,sx+ts*x4,sy+ts*y4); ctx.stroke();
+    });
+    ctx.fillStyle='rgba(255,255,255,.5)';
+    [[.2,.14],[.74,.44],[.5,.74]].forEach(([rx,ry])=>{ ctx.fillRect(sx+rx*ts,sy+ry*ts,ts*.05,ts*.05); });
   } else if (type===4||type===8||type===9) {
-    // Building wall
-    ctx.fillStyle = '#9090a0';
-    ctx.fillRect(sx,sy,ts,ts);
-    if (type===4) {
-      // Window
-      ctx.fillStyle='#aad8f8'; ctx.fillRect(sx+ts*.2,sy+ts*.2,ts*.25,ts*.25);
-      ctx.fillStyle='#aad8f8'; ctx.fillRect(sx+ts*.55,sy+ts*.2,ts*.25,ts*.25);
+    const isPC=type===8,isShop=type===9;
+    const roofC=isPC?'#c04060':isShop?'#4060c0':'#6070a0';
+    const wallC=isPC?'#f0d0da':isShop?'#d0d2f0':'#dcdce8';
+    // Roof
+    ctx.fillStyle=roofC; ctx.fillRect(sx,sy,ts,ts*.28);
+    ctx.fillStyle='rgba(255,255,255,.18)'; ctx.fillRect(sx,sy,ts,ts*.06);
+    // Wall
+    ctx.fillStyle=wallC; ctx.fillRect(sx,sy+ts*.28,ts,ts*.72);
+    ctx.fillStyle='rgba(0,0,0,.07)'; ctx.fillRect(sx+ts*.82,sy+ts*.28,ts*.18,ts*.72);
+    if(type===4){
+      // Windows
+      [.1,.52].forEach(wx=>{
+        ctx.fillStyle='#b8dff0'; ctx.fillRect(sx+ts*wx,sy+ts*.36,ts*.24,ts*.22);
+        ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillRect(sx+ts*wx,sy+ts*.36,ts*.09,ts*.07);
+      });
     } else {
       // Door
-      ctx.fillStyle='#6a3a1a'; ctx.fillRect(sx+ts*.3,sy+ts*.35,ts*.4,ts*.65);
-      ctx.fillStyle='#f8c820'; ctx.beginPath(); ctx.arc(sx+ts*.67,sy+ts*.65,ts*.06,0,Math.PI*2); ctx.fill();
-      // Sign above door
-      if (type===8) { ctx.fillStyle='#ff6666'; } else { ctx.fillStyle='#6666ff'; }
-      ctx.fillRect(sx+ts*.2,sy+ts*.05,ts*.6,ts*.25);
-      ctx.fillStyle='#fff'; ctx.font=`bold ${ts*.12}px sans-serif`; ctx.textAlign='center';
-      ctx.fillText(type===8?'PC':'SHOP', sx+ts*.5, sy+ts*.22);
+      ctx.fillStyle='#7a4a20'; ctx.fillRect(sx+ts*.3,sy+ts*.44,ts*.38,ts*.56);
+      ctx.fillStyle='rgba(0,0,0,.14)'; ctx.fillRect(sx+ts*.5,sy+ts*.44,ts*.18,ts*.56);
+      ctx.fillStyle='#f8d840'; ctx.beginPath(); ctx.arc(sx+ts*.64,sy+ts*.67,ts*.05,0,Math.PI*2); ctx.fill();
+      // Sign
+      ctx.fillStyle=roofC; ctx.fillRect(sx+ts*.16,sy+ts*.04,ts*.68,ts*.2);
+      ctx.fillStyle='#fff'; ctx.font=`bold ${ts*.11}px sans-serif`; ctx.textAlign='center';
+      ctx.fillText(isPC?'PKM CENTER':'POKE SHOP',sx+ts*.5,sy+ts*.18);
     }
   } else if (type===6) {
-    // Flowers
-    const fc=['#f8c820','#f840a0','#f86020'];
-    for (let i=0;i<3;i++) {
-      const fx=sx+ts*(.2+i*.28), fy=sy+ts*(.3+i*.2);
-      ctx.fillStyle=fc[i]; ctx.beginPath(); ctx.arc(fx,fy,ts*.1,0,Math.PI*2); ctx.fill();
-    }
+    // Flower patch
+    ctx.fillStyle='#58c258'; ctx.fillRect(sx,sy,ts,ts);
+    const fls=[{x:.2,y:.42,c:'#f8d020'},{x:.56,y:.24,c:'#ff5090'},{x:.78,y:.58,c:'#ff6020'},{x:.36,y:.68,c:'#ffffff'},{x:.65,y:.8,c:'#cc60ff'}];
+    fls.forEach(({x,y,c})=>{
+      for(let a=0;a<5;a++){
+        ctx.fillStyle=c;
+        const ax=sx+x*ts+Math.cos(a*Math.PI*2/5)*ts*.1,ay=sy+y*ts+Math.sin(a*Math.PI*2/5)*ts*.1;
+        ctx.beginPath(); ctx.arc(ax,ay,ts*.07,0,Math.PI*2); ctx.fill();
+      }
+      ctx.fillStyle='#f8e020'; ctx.beginPath(); ctx.arc(sx+x*ts,sy+y*ts,ts*.05,0,Math.PI*2); ctx.fill();
+    });
   } else if (type===5) {
-    // Sign post
-    ctx.fillStyle='#8a6030'; ctx.fillRect(sx+ts*.45,sy+ts*.4,ts*.1,ts*.6);
-    ctx.fillStyle='#c8903a'; ctx.fillRect(sx+ts*.2,sy+ts*.15,ts*.6,ts*.3);
+    ctx.fillStyle='#d4b870'; ctx.fillRect(sx,sy,ts,ts);
+    ctx.fillStyle='#8a6030'; ctx.fillRect(sx+ts*.44,sy+ts*.4,ts*.12,ts*.6);
+    ctx.fillStyle='#c8963a'; ctx.fillRect(sx+ts*.18,sy+ts*.12,ts*.64,ts*.3);
+    ctx.fillStyle='rgba(0,0,0,.12)'; ctx.fillRect(sx+ts*.5,sy+ts*.12,ts*.32,ts*.3);
   }
 
-  // Subtle grid line
-  ctx.strokeStyle='rgba(0,0,0,.08)'; ctx.lineWidth=.5;
+  ctx.strokeStyle='rgba(0,0,0,.07)'; ctx.lineWidth=.5;
   ctx.strokeRect(sx,sy,ts,ts);
 }
 
@@ -772,10 +802,10 @@ function renderTitle(){
     </div>
     <div style="font-size:90px;line-height:1;text-shadow:0 4px 20px rgba(255,100,0,.5)">◗</div>
     <div style="width:100%;display:flex;flex-direction:column;gap:12px">
-      ${has?`<button class="btn-blue" onclick="navGo('continue')">CONTINUE</button>`:''}
-      <button class="btn-red" onclick="navGo('new')">NEW GAME</button>
+      ${has?`<button class="btn-blue" style="font-size:18px;padding:18px;border-width:3px;border-color:#66aaff" onclick="navGo('continue')">▶ CONTINUE ADVENTURE</button><div style="color:#66aaff;font-size:12px;text-align:center;margin-top:-4px">Your saved game will be loaded</div>`:''}
+      <button class="${has?'btn-dark':'btn-red'}" onclick="navGo('new')">${has?'New Game (will overwrite save)':'NEW GAME'}</button>
     </div>
-    <div style="color:#555;font-size:12px">Music plays automatically — needs one tap first!</div>
+    <div style="color:#555;font-size:12px;text-align:center">Progress saves automatically every few steps, after battles, and at the Pokemon Center.</div>
   </div>`;
 }
 
@@ -799,8 +829,20 @@ function renderBattle(){
   const sceneH=Math.round(window.innerHeight*.45);
   const xpPct=()=>{const base=xpForLv(p.lv),next=p.xpNext,cur=p.xp;return next===base?100:Math.max(0,Math.round(((cur-base)/(next-base))*100));};
 
-  // Draw battle background as canvas-like CSS
   const bgStyle=`background:linear-gradient(180deg,${bg.sky} 0%,${bg.sky} ${bg.skyH*100}%,${bg.horizon} ${bg.skyH*100}%,${bg.ground} 100%);`;
+
+  // Scenery elements
+  const sunTop=Math.round(bg.skyH*sceneH*.15);
+  const sunEl=bg.moon
+    ?`<div style="position:absolute;top:${sunTop}px;right:18%;width:26px;height:26px;background:${bg.sun};border-radius:50%;box-shadow:0 0 18px 6px ${bg.sun}88;opacity:.9"></div>`
+    :`<div style="position:absolute;top:${sunTop}px;right:15%;width:30px;height:30px;background:${bg.sun};border-radius:50%;box-shadow:0 0 22px 8px ${bg.sun}66"></div>`;
+  const starsEl=bg.stars?Array.from({length:14},(_,i)=>`<div style="position:absolute;top:${Math.round(3+Math.sin(i*7.3)*bg.skyH*sceneH*.7)}px;left:${Math.round(4+(i*61)%90)}%;width:2px;height:2px;background:#fff;border-radius:50%;opacity:${.4+.5*(i%3)/3}"></div>`).join(''):'';
+  const cloudEl=bg.clouds?`
+    <div style="position:absolute;top:${Math.round(bg.skyH*sceneH*.08)}px;left:4%;width:64px;height:18px;background:rgba(255,255,255,.72);border-radius:20px;filter:blur(3px)"></div>
+    <div style="position:absolute;top:${Math.round(bg.skyH*sceneH*.08)-4}px;left:8%;width:36px;height:18px;background:rgba(255,255,255,.72);border-radius:20px;filter:blur(3px)"></div>
+    <div style="position:absolute;top:${Math.round(bg.skyH*sceneH*.18)}px;left:38%;width:80px;height:20px;background:rgba(255,255,255,.55);border-radius:20px;filter:blur(4px)"></div>
+    <div style="position:absolute;top:${Math.round(bg.skyH*sceneH*.18)-5}px;left:44%;width:44px;height:20px;background:rgba(255,255,255,.55);border-radius:20px;filter:blur(3px)"></div>`:'';
+  const groundShade=`<div style="position:absolute;bottom:0;left:0;right:0;height:${Math.round(sceneH*.14)}px;background:rgba(0,0,0,.18);border-radius:0"></div>`;
 
   const ui = b.phase==='reading'
     ?`<div class="msg-box" onclick="bAdvMsg()"><div class="msg-text">${b.msgs[b.msgIdx]||''}</div><div class="tap-hint">${b.msgIdx<b.msgs.length-1?'▼ tap':'▼ tap to continue'}</div></div>`
@@ -824,6 +866,7 @@ function renderBattle(){
 
   return`<div class="battle-wrap">
     <div class="battle-scene" style="${bgStyle}height:${sceneH}px">
+      ${starsEl}${sunEl}${cloudEl}${groundShade}
       <!-- Wild Pokemon top-right -->
       <div style="position:absolute;top:${sceneH*.05}px;right:10px">
         <img id="wild-spr" src="${spr(w.dexId,true)}" width="${Math.round(sceneH*.35)}" height="${Math.round(sceneH*.35)}" style="image-rendering:pixelated;filter:drop-shadow(2px 4px 4px rgba(0,0,0,.4))">
