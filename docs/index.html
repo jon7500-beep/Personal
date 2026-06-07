@@ -1119,12 +1119,11 @@ function navGo(action) {
   switch(action){
     case 'new': G.playerName='';G.party=[];G.bag={pokeballs:15,potions:5,gold:10000};G.area='Route 1';G.caught={};_starterChosen=[];OW.player={tx:7,ty:6,px:0,py:0,dir:'down',moving:false,stepF:0,walkCycle:0,targetTX:7,targetTY:6};G.screen='name';render();break;
     case 'continue': if(loadGame()){G.screen='overworld';render();}break;
-    case 'nameNext':{const n=document.getElementById('nameIn');const v=(n&&n.value||G.playerName).trim();if(!v){alert('Please enter your name!');return;}G.playerName=v;G.screen='starter';_starterChosen=null;render();break;}
+    case 'nameNext':{const n=document.getElementById('nameIn');const v=(n&&n.value||G.playerName).trim();if(!v){alert('Please enter your name!');return;}G.playerName=v;G.screen='starter';_starterChosen=[];render();break;}
     case 'startGame': if(_starterChosen.length<6)return;G.party=_starterChosen.map(id=>createMon(id,45));saveGame();G.screen='overworld';render();break;
   }
 }
 
-function chooseStarter(id){_starterChosen=id;render();}
 
 function buyItem(key,cost){
   if((G.bag.gold||0)<cost)return;
