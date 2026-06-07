@@ -5,742 +5,1080 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#1a1a2e">
+<meta name="theme-color" content="#1a3a1a">
 <title>Pokemon Adventure</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
-body{background:#1a1a2e;color:#fff;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;min-height:100dvh;overflow:hidden}
-#app{width:100%;height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;overflow:hidden}
-button{cursor:pointer;border:none;font-family:inherit;font-size:16px;font-weight:700;border-radius:12px;padding:14px 20px;width:100%;transition:opacity .1s;-webkit-appearance:none}
-button:active{opacity:.75}
+html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;touch-action:none}
+#app{width:100%;height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;overflow:hidden}
+button{cursor:pointer;border:none;font-family:inherit;font-size:16px;font-weight:700;border-radius:12px;padding:14px 20px;width:100%;-webkit-appearance:none;transition:opacity .08s}
+button:active{opacity:.7}
 .btn-red{background:#cc0000;color:#fff;border:2px solid #ff4444}
 .btn-blue{background:#1a3a8e;color:#fff;border:2px solid #3366cc}
 .btn-dark{background:#1f1f3a;color:#fff;border:2px solid #333}
 .btn-green{background:#1a5c1a;color:#fff;border:2px solid #44aa44}
+.btn-gold{background:#8a6a00;color:#f8c800;border:2px solid #f8c800}
 .btn-disabled{background:#333;color:#666;border:2px solid #444}
-.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.gold{color:#f8c800}
-.red{color:#f83800}
-.green{color:#44dd44}
-.type-badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:700;color:#fff;margin-right:4px}
-.hp-track{height:8px;background:#333;border-radius:4px;overflow:hidden;border:1px solid #555}
-.hp-fill{height:100%;border-radius:4px;transition:width .3s}
-.xp-track{height:4px;background:#333;border-radius:2px;overflow:hidden;margin-top:4px}
-.xp-fill{height:100%;background:#4080ff;border-radius:2px}
 .screen{display:flex;flex-direction:column;height:100%;padding:16px;overflow-y:auto}
-/* BATTLE LAYOUT */
-.battle-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
-.battle-wild{background:linear-gradient(135deg,#c8e8b0,#e8f5d8);padding:12px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.battle-player{background:linear-gradient(135deg,#b0c8e8,#d8eaf8);padding:12px;display:flex;align-items:center;flex-shrink:0}
-.battle-ui{flex:1;background:#0d0d1f;display:flex;flex-direction:column;overflow:hidden}
-.mon-name{font-size:17px;font-weight:800;color:#111}
-.mon-level{font-size:12px;color:#555;margin-bottom:2px}
-.hp-row{display:flex;align-items:center;gap:6px;margin-top:2px}
-.hp-label{font-size:11px;font-weight:700;color:#333;width:20px;flex-shrink:0}
-.hp-bar-wrap{flex:1}
-.hp-nums{font-size:12px;font-weight:700;margin-top:2px}
+.gold{color:#f8c800}.red{color:#f83800}.green{color:#44dd44}
+.hp-track{height:8px;background:#333;border-radius:4px;overflow:hidden;border:1px solid #444}
+.hp-fill{height:100%;border-radius:4px;transition:width .3s}
+.xp-track{height:4px;background:#333;border-radius:2px;overflow:hidden;margin-top:3px}
+.xp-fill{height:100%;background:#4080ff;border-radius:2px}
+.type-badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;color:#fff;margin-right:3px}
 .status-badge{display:inline-block;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700;color:#fff;margin-left:4px}
-/* SPRITE */
-.sprite{image-rendering:pixelated;image-rendering:crisp-edges}
-/* MSG BOX */
-.msg-box{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px;border-top:2px solid #333;cursor:pointer}
-.msg-text{font-size:18px;font-weight:600;line-height:1.5;color:#fff}
-.tap-hint{font-size:12px;color:#666;margin-top:10px;text-align:right}
-/* MENU */
-.menu-wrap{flex:1;display:flex;flex-direction:column;padding:12px;gap:8px;overflow:hidden}
-.menu-prompt{font-size:14px;color:#ccc;margin-bottom:4px}
-.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1}
-.menu-btn{background:#1a2a5e;border:2px solid #334;border-radius:12px;color:#fff;font-size:15px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px;cursor:pointer}
+/* ── BATTLE ── */
+.battle-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.battle-scene{position:relative;flex-shrink:0;overflow:hidden}
+.battle-wild-info{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.55);border-radius:12px;padding:8px 12px;backdrop-filter:blur(4px)}
+.battle-player-info{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.55);border-radius:12px;padding:8px 12px;text-align:right;backdrop-filter:blur(4px)}
+.battle-ui{flex:1;background:#0d0d1f;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.mon-name{font-size:16px;font-weight:800;color:#fff}
+.mon-level{font-size:11px;color:#bbb;margin-bottom:2px}
+.msg-box{flex:1;display:flex;flex-direction:column;justify-content:center;padding:18px 20px;border-top:2px solid #333;cursor:pointer;min-height:0}
+.msg-text{font-size:17px;font-weight:600;line-height:1.5;color:#fff}
+.tap-hint{font-size:11px;color:#555;margin-top:8px;text-align:right}
+.menu-wrap{flex:1;display:flex;flex-direction:column;padding:10px;gap:6px;overflow:hidden}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;max-height:160px}
+.menu-btn{background:#1a2a5e;border:2px solid #334;border-radius:12px;color:#fff;font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer}
 .menu-btn:active{opacity:.7}
-.menu-btn-icon{font-size:22px}
-/* MOVE LIST */
-.move-list{flex:1;display:flex;flex-direction:column;padding:10px;gap:8px;overflow:hidden}
-.move-btn{background:#141428;border:2px solid #555;border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center}
+.move-list{flex:1;display:flex;flex-direction:column;padding:8px;gap:6px;overflow:hidden}
+.move-btn{background:#141428;border:2px solid #555;border-radius:10px;padding:8px 10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .move-btn:active{opacity:.7}
 .move-btn.depleted{opacity:.35}
-.move-name{font-size:14px;font-weight:700;color:#fff}
-.move-meta{font-size:11px;color:#aaa}
-/* PARTY ROWS */
+/* ── OVERWORLD ── */
+#ow-wrap{position:relative;width:100%;height:100%;background:#1a3a1a;overflow:hidden;touch-action:none}
+#ow-canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+#ow-hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:10;pointer-events:none}
+#ow-hud .hud-btn{pointer-events:all;cursor:pointer;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:4px 10px;color:#fff;font-size:13px;font-weight:700}
+#ow-btns{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-end;padding:10px;z-index:10;pointer-events:none}
+.dpad{display:grid;grid-template-columns:40px 40px 40px;grid-template-rows:40px 40px 40px;gap:2px;pointer-events:all}
+.dpad-btn{background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:#fff;touch-action:none}
+.dpad-btn:active,.dpad-btn.pressed{background:rgba(255,255,255,.45)}
+.dpad-center{background:rgba(255,255,255,.1) !important;cursor:default}
+.action-btns{display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:all}
+.action-btn{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;cursor:pointer;border:3px solid rgba(255,255,255,.4)}
+#ow-dialog{position:absolute;bottom:120px;left:10px;right:10px;background:rgba(0,0,0,.88);border:2px solid #f8c800;border-radius:14px;padding:14px;z-index:20;cursor:pointer;display:none}
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;z-index:100}
+.modal-box{background:#1a1a2e;border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto;max-width:480px;margin:0 auto}
+/* ── SHOP ── */
+.shop-item{background:#141428;border-radius:12px;padding:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border:1px solid #333}
+/* ── PARTY ── */
 .party-row{background:#141428;border-radius:14px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:10px;border:1px solid #2a2a55}
 .party-row.fainted{opacity:.4}
-/* AREA PICKER */
-.area-opt{padding:14px 8px;border-bottom:1px solid #222;display:flex;justify-content:space-between;cursor:pointer}
-.area-opt:active{background:#2a2a45}
-.area-opt.locked{opacity:.35;cursor:default}
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;z-index:100}
-.modal-box{background:#1a1a2e;border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto;max-width:480px;margin:0 auto}
+/* ── FLASH ANIMATION ── */
+@keyframes flash{0%,100%{opacity:1}50%{opacity:0}}
+.flash{animation:flash .25s 2}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.shake{animation:shake .4s}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
-// ─── DATA ──────────────────────────────────────────────────────────────────
-const TYPE_COLORS={Normal:'#a8a878',Fire:'#e2621b',Water:'#4a90d9',Grass:'#5db85a',Electric:'#f8c800',Ice:'#98d8d8',Fighting:'#c03028',Poison:'#a040a0',Ground:'#e0c068',Flying:'#a890f0',Psychic:'#f85888',Bug:'#a8b820',Rock:'#b8a038',Ghost:'#705898',Dragon:'#7038f8',Dark:'#705848',Steel:'#b8b8d0'};
+'use strict';
 
-const TYPE_CHART={Normal:{Rock:.5,Ghost:0,Steel:.5},Fire:{Fire:.5,Water:.5,Grass:2,Ice:2,Bug:2,Rock:.5,Dragon:.5,Steel:2},Water:{Fire:2,Water:.5,Grass:.5,Ground:2,Rock:2,Dragon:.5},Grass:{Fire:.5,Water:2,Grass:.5,Poison:.5,Ground:2,Flying:.5,Bug:.5,Rock:2,Dragon:.5,Steel:.5},Electric:{Water:2,Electric:.5,Grass:.5,Ground:0,Flying:2,Dragon:.5},Ice:{Water:.5,Grass:2,Ice:.5,Ground:2,Flying:2,Dragon:2,Steel:.5},Fighting:{Normal:2,Ice:2,Poison:.5,Flying:.5,Psychic:.5,Bug:.5,Rock:2,Ghost:0,Dark:2,Steel:2},Poison:{Grass:2,Poison:.5,Ground:.5,Rock:.5,Ghost:.5,Steel:0},Ground:{Fire:2,Electric:2,Grass:.5,Poison:2,Flying:0,Bug:.5,Rock:2,Steel:2},Flying:{Electric:.5,Grass:2,Fighting:2,Bug:2,Rock:.5,Steel:.5},Psychic:{Fighting:2,Poison:2,Psychic:.5,Dark:0,Steel:.5},Bug:{Fire:.5,Grass:2,Fighting:.5,Flying:.5,Psychic:2,Ghost:.5,Dark:2,Steel:.5},Rock:{Fire:2,Ice:2,Fighting:.5,Ground:.5,Flying:2,Bug:2,Steel:.5},Ghost:{Normal:0,Psychic:2,Ghost:2,Dark:.5},Dragon:{Dragon:2,Steel:.5},Dark:{Fighting:.5,Psychic:2,Ghost:2,Dark:.5,Steel:.5},Steel:{Fire:.5,Water:.5,Electric:.5,Ice:2,Rock:2,Steel:.5}};
+// ══════════════════════════════════════════════════════
+//  AUDIO ENGINE
+// ══════════════════════════════════════════════════════
+let _actx = null;
+let _masterGain = null;
+let _muted = false;
+let _musicTrack = null;
+let _musicTimeout = null;
 
-function typeEffect(atkType,defTypes){let m=1;for(const t of defTypes){const v=TYPE_CHART[atkType]?.[t];if(v!==undefined)m*=v;}return m;}
+function getACtx() {
+  if (!_actx) {
+    _actx = new (window.AudioContext || window.webkitAudioContext)();
+    _masterGain = _actx.createGain();
+    _masterGain.gain.value = 0.25;
+    _masterGain.connect(_actx.destination);
+  }
+  if (_actx.state === 'suspended') _actx.resume();
+  return _actx;
+}
+
+function _note(freq, start, dur, type='square', vol=0.15) {
+  if (_muted || !_actx) return;
+  const osc = _actx.createOscillator();
+  const g = _actx.createGain();
+  osc.connect(g); g.connect(_masterGain);
+  osc.type = type; osc.frequency.value = freq;
+  g.gain.setValueAtTime(vol, start);
+  g.gain.exponentialRampToValueAtTime(0.001, start + dur * 0.88);
+  osc.start(start); osc.stop(start + dur + 0.01);
+}
+
+// Note frequencies
+const Hz = {
+  A2:110,B2:123.5,C3:130.8,D3:146.8,E3:164.8,F3:174.6,G3:196,A3:220,B3:246.9,
+  C4:261.6,D4:293.7,E4:329.6,F4:349.2,G4:392,A4:440,B4:493.9,
+  C5:523.3,D5:587.3,E5:659.3,F5:698.5,G5:784,A5:880,
+  __:0
+};
+
+function stopMusic() {
+  _musicTrack = null;
+  clearTimeout(_musicTimeout);
+  _musicTimeout = null;
+}
+
+function _scheduleNotes(notes, bpm, offset=0) {
+  const beat = 60/bpm;
+  const now = _actx.currentTime + 0.05 + offset;
+  let t = now, total = 0;
+  for (const n of notes) {
+    if (n[0] > 0) _note(n[0], t, beat*n[1], n[2]||'square', n[3]||0.13);
+    t += beat*n[1]; total += beat*n[1];
+  }
+  return total;
+}
+
+const OW_MELODY = [
+  [Hz.G4,.5],[Hz.E4,.5],[Hz.G4,.5],[Hz.A4,.5],
+  [Hz.B4,.5],[Hz.A4,.25],[Hz.G4,.25],[Hz.E4,.5],
+  [Hz.D4,.25],[Hz.E4,.25],[Hz.G4,1],
+  [Hz.A4,.5],[Hz.G4,.25],[Hz.F4,.25],[Hz.G4,.5],
+  [Hz.A4,.5],[Hz.F4,.25],[Hz.E4,.25],[Hz.D4,.25],[Hz.C4,.25],[Hz.D4,1],
+  [Hz.E4,.5],[Hz.G4,.5],[Hz.A4,.5],[Hz.B4,.5],
+  [Hz.G4,.5],[Hz.E4,.25],[Hz.D4,.25],[Hz.E4,.5],
+  [Hz.C4,.25],[Hz.E4,.25],[Hz.G4,1.5],
+];
+const OW_BASS = [
+  [Hz.C3,1,'triangle',.08],[Hz.G3,1,'triangle',.08],[Hz.C3,1,'triangle',.08],[Hz.G3,1,'triangle',.08],
+  [Hz.F3,1,'triangle',.08],[Hz.C3,1,'triangle',.08],[Hz.G3,1,'triangle',.08],[Hz.G3,1,'triangle',.08],
+  [Hz.A3,1,'triangle',.08],[Hz.E3,1,'triangle',.08],[Hz.F3,1,'triangle',.08],[Hz.G3,1,'triangle',.08],
+];
+const BATTLE_MELODY = [
+  [Hz.E4,.25],[Hz.E4,.25],[Hz.__,.12],[Hz.E4,.25],
+  [Hz.C4,.25],[Hz.E4,.5],[Hz.G4,.75],[Hz.__,.25],[Hz.G3,.75],
+  [Hz.A4,.5],[Hz.B4,.5],[Hz.A4,.25],[Hz.G4,.5],
+  [Hz.E5,.375],[Hz.G5,.375],[Hz.A5,.5],
+  [Hz.F5,.375],[Hz.G5,.25],[Hz.E5,.375],[Hz.C5,.25],[Hz.D5,.25],[Hz.B4,.5],
+];
+const BATTLE_BASS = [
+  [Hz.A2,.5,'triangle',.1],[Hz.A2,.5,'triangle',.1],
+  [Hz.G3,.5,'triangle',.1],[Hz.G3,.5,'triangle',.1],
+  [Hz.A2,.5,'triangle',.1],[Hz.A2,.5,'triangle',.1],
+  [Hz.E3,.5,'triangle',.1],[Hz.F3,.5,'triangle',.1],
+];
+
+function playMusic(track) {
+  stopMusic();
+  getACtx();
+  if (_muted) { _musicTrack = track; return; }
+  _musicTrack = track;
+  if (track === 'overworld') _loopOW();
+  else if (track === 'battle') _loopBattle();
+}
+
+function _loopOW() {
+  if (_musicTrack !== 'overworld') return;
+  const dur = _scheduleNotes(OW_MELODY, 130);
+  _scheduleNotes(OW_BASS, 130);
+  _musicTimeout = setTimeout(_loopOW, (dur - 0.15) * 1000);
+}
+
+function _loopBattle() {
+  if (_musicTrack !== 'battle') return;
+  const dur = _scheduleNotes(BATTLE_MELODY, 158);
+  _scheduleNotes(BATTLE_BASS, 158);
+  _musicTimeout = setTimeout(_loopBattle, (dur - 0.15) * 1000);
+}
+
+function toggleMute() {
+  _muted = !_muted;
+  if (_masterGain) _masterGain.gain.value = _muted ? 0 : 0.25;
+  if (!_muted && _musicTrack) { const t=_musicTrack; stopMusic(); playMusic(t); }
+  const btn = document.getElementById('mute-btn');
+  if (btn) btn.textContent = _muted ? '🔇' : '🔊';
+}
+
+const SFX = {
+  _play(fn) { try { getACtx(); fn(_actx); } catch(e){} },
+  hit()     { this._play(c=>{ const o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(_masterGain); o.type='square'; o.frequency.setValueAtTime(220,c.currentTime); o.frequency.exponentialRampToValueAtTime(80,c.currentTime+.12); g.gain.setValueAtTime(.25,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.15); o.start();o.stop(c.currentTime+.16); }); },
+  select()  { if(_muted)return; _note(Hz.C5,_actx.currentTime,.06,'square',.1); _note(Hz.E5,_actx.currentTime+.07,.06,'square',.1); },
+  catch_()  { if(_muted)return; [Hz.C4,Hz.E4,Hz.G4,Hz.C5].forEach((f,i)=>_note(f,_actx.currentTime+i*.1,.18,'square',.12)); },
+  levelUp() { if(_muted)return; [Hz.C4,Hz.E4,Hz.G4,Hz.C5,Hz.E5,Hz.G5].forEach((f,i)=>_note(f,_actx.currentTime+i*.08,.12,'square',.1)); },
+  victory() { stopMusic(); if(_muted)return; getACtx(); [[Hz.C4,.15],[Hz.C4,.15],[Hz.C4,.15],[Hz.G4,.6],[Hz.E4,.6],[Hz.C4,.15],[Hz.E4,.15],[Hz.G4,.8]].forEach(([f,d],i,a)=>{ const t=_actx.currentTime+a.slice(0,i).reduce((s,x)=>s+x[1],0); _note(f,t,d,'square',.15); }); },
+  step()    { if(_muted)return; this._play(c=>{ const o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(_masterGain); o.type='triangle'; o.frequency.value=80+Math.random()*30; g.gain.setValueAtTime(.06,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.05); o.start();o.stop(c.currentTime+.06); }); },
+  heal()    { if(_muted)return; [Hz.G4,Hz.A4,Hz.B4,Hz.C5].forEach((f,i)=>_note(f,_actx.currentTime+i*.1,.2,'triangle',.1)); },
+  buy()     { if(_muted)return; _note(Hz.G5,_actx.currentTime,.1,'square',.1); _note(Hz.C5,_actx.currentTime+.12,.2,'square',.1); },
+};
+
+// ══════════════════════════════════════════════════════
+//  TYPE CHART
+// ══════════════════════════════════════════════════════
+const TC={Normal:{Rock:.5,Ghost:0,Steel:.5},Fire:{Fire:.5,Water:.5,Grass:2,Ice:2,Bug:2,Rock:.5,Dragon:.5,Steel:2},Water:{Fire:2,Water:.5,Grass:.5,Ground:2,Rock:2,Dragon:.5},Grass:{Fire:.5,Water:2,Grass:.5,Poison:.5,Ground:2,Flying:.5,Bug:.5,Rock:2,Dragon:.5,Steel:.5},Electric:{Water:2,Electric:.5,Grass:.5,Ground:0,Flying:2,Dragon:.5},Ice:{Water:.5,Grass:2,Ice:.5,Ground:2,Flying:2,Dragon:2,Steel:.5},Fighting:{Normal:2,Ice:2,Poison:.5,Flying:.5,Psychic:.5,Bug:.5,Rock:2,Ghost:0,Dark:2,Steel:2},Poison:{Grass:2,Poison:.5,Ground:.5,Rock:.5,Ghost:.5,Steel:0},Ground:{Fire:2,Electric:2,Grass:.5,Poison:2,Flying:0,Bug:.5,Rock:2,Steel:2},Flying:{Electric:.5,Grass:2,Fighting:2,Bug:2,Rock:.5,Steel:.5},Psychic:{Fighting:2,Poison:2,Psychic:.5,Dark:0,Steel:.5},Bug:{Fire:.5,Grass:2,Fighting:.5,Flying:.5,Psychic:2,Ghost:.5,Dark:2,Steel:.5},Rock:{Fire:2,Ice:2,Fighting:.5,Ground:.5,Flying:2,Bug:2,Steel:.5},Ghost:{Normal:0,Psychic:2,Ghost:2,Dark:.5},Dragon:{Dragon:2,Steel:.5},Dark:{Fighting:.5,Psychic:2,Ghost:2,Dark:.5,Steel:.5},Steel:{Fire:.5,Water:.5,Electric:.5,Ice:2,Rock:2,Steel:.5}};
+function typeEff(at,dts){let m=1;for(const t of dts){const v=TC[at]?.[t];if(v!==undefined)m*=v;}return m;}
 function typeText(m){return m===0?'It had no effect!':m>=2?"It's super effective!":m<=.5?"It's not very effective...":null;}
+const TC_COLOR={Normal:'#a8a878',Fire:'#e2621b',Water:'#4a90d9',Grass:'#5db85a',Electric:'#f8c800',Ice:'#98d8d8',Fighting:'#c03028',Poison:'#a040a0',Ground:'#e0c068',Flying:'#a890f0',Psychic:'#f85888',Bug:'#a8b820',Rock:'#b8a038',Ghost:'#705898',Dragon:'#7038f8',Dark:'#705848',Steel:'#b8b8d0'};
 
-const MOVES={
-  1:{id:1,name:'Tackle',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},
-  2:{id:2,name:'Growl',type:'Normal',cat:'Status',power:0,acc:100,pp:40,eff:{k:'stat',stat:'atk',stg:-1,tgt:'foe'}},
-  3:{id:3,name:'Vine Whip',type:'Grass',cat:'Physical',power:45,acc:100,pp:25},
-  4:{id:4,name:'Leech Seed',type:'Grass',cat:'Status',power:0,acc:90,pp:10,eff:{k:'status',status:'leech'}},
-  5:{id:5,name:'Razor Leaf',type:'Grass',cat:'Physical',power:55,acc:95,pp:25,hc:true},
-  6:{id:6,name:'Sleep Powder',type:'Grass',cat:'Status',power:0,acc:75,pp:15,eff:{k:'status',status:'sleep'}},
-  7:{id:7,name:'Scratch',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},
-  8:{id:8,name:'Ember',type:'Fire',cat:'Special',power:40,acc:100,pp:25,eff:{k:'status',status:'burn',ch:10}},
-  9:{id:9,name:'Smokescreen',type:'Normal',cat:'Status',power:0,acc:100,pp:20,eff:{k:'stat',stat:'acc',stg:-1,tgt:'foe'}},
-  10:{id:10,name:'Flamethrower',type:'Fire',cat:'Special',power:90,acc:100,pp:15,eff:{k:'status',status:'burn',ch:10}},
-  12:{id:12,name:'Tail Whip',type:'Normal',cat:'Status',power:0,acc:100,pp:30,eff:{k:'stat',stat:'def',stg:-1,tgt:'foe'}},
-  13:{id:13,name:'Bubble',type:'Water',cat:'Special',power:40,acc:100,pp:30},
-  14:{id:14,name:'Water Gun',type:'Water',cat:'Special',power:40,acc:100,pp:25},
-  15:{id:15,name:'Surf',type:'Water',cat:'Special',power:90,acc:100,pp:15},
-  17:{id:17,name:'Body Slam',type:'Normal',cat:'Physical',power:85,acc:100,pp:15,eff:{k:'status',status:'paralysis',ch:30}},
-  18:{id:18,name:'Quick Attack',type:'Normal',cat:'Physical',power:40,acc:100,pp:30,pri:1},
-  19:{id:19,name:'ThunderShock',type:'Electric',cat:'Special',power:40,acc:100,pp:30,eff:{k:'status',status:'paralysis',ch:10}},
-  20:{id:20,name:'Thunderbolt',type:'Electric',cat:'Special',power:90,acc:100,pp:15,eff:{k:'status',status:'paralysis',ch:10}},
-  22:{id:22,name:'Ice Beam',type:'Ice',cat:'Special',power:90,acc:100,pp:10,eff:{k:'status',status:'freeze',ch:10}},
-  24:{id:24,name:'Psychic',type:'Psychic',cat:'Special',power:90,acc:100,pp:10},
-  25:{id:25,name:'Confusion',type:'Psychic',cat:'Special',power:50,acc:100,pp:25},
-  26:{id:26,name:'Poison Sting',type:'Poison',cat:'Physical',power:15,acc:100,pp:35,eff:{k:'status',status:'poison',ch:30}},
-  27:{id:27,name:'Sludge',type:'Poison',cat:'Special',power:65,acc:100,pp:20,eff:{k:'status',status:'poison',ch:30}},
-  28:{id:28,name:'Earthquake',type:'Ground',cat:'Physical',power:100,acc:100,pp:10},
-  29:{id:29,name:'String Shot',type:'Bug',cat:'Status',power:0,acc:95,pp:40,eff:{k:'stat',stat:'spd',stg:-2,tgt:'foe'}},
-  30:{id:30,name:'Wing Attack',type:'Flying',cat:'Physical',power:60,acc:100,pp:35},
-  31:{id:31,name:'Gust',type:'Flying',cat:'Special',power:40,acc:100,pp:35},
-  32:{id:32,name:'Karate Chop',type:'Fighting',cat:'Physical',power:50,acc:100,pp:25,hc:true},
-  33:{id:33,name:'Lick',type:'Ghost',cat:'Physical',power:30,acc:100,pp:30,eff:{k:'status',status:'paralysis',ch:30}},
-  34:{id:34,name:'Rock Throw',type:'Rock',cat:'Physical',power:50,acc:90,pp:15},
-  35:{id:35,name:'Peck',type:'Flying',cat:'Physical',power:35,acc:100,pp:35},
-  36:{id:36,name:'Bite',type:'Dark',cat:'Physical',power:60,acc:100,pp:25},
-  37:{id:37,name:'Leer',type:'Normal',cat:'Status',power:0,acc:100,pp:30,eff:{k:'stat',stat:'def',stg:-1,tgt:'foe'}},
-  40:{id:40,name:'Splash',type:'Normal',cat:'Status',power:0,acc:100,pp:40},
-  41:{id:41,name:'Acid',type:'Poison',cat:'Special',power:40,acc:100,pp:30},
-  42:{id:42,name:'Headbutt',type:'Normal',cat:'Physical',power:70,acc:100,pp:15},
-  43:{id:43,name:'Low Kick',type:'Fighting',cat:'Physical',power:65,acc:100,pp:20},
-  44:{id:44,name:'Wrap',type:'Normal',cat:'Physical',power:15,acc:85,pp:20},
-  45:{id:45,name:'Absorb',type:'Grass',cat:'Special',power:20,acc:100,pp:25,drain:true},
-  46:{id:46,name:'Sing',type:'Normal',cat:'Status',power:0,acc:55,pp:15,eff:{k:'status',status:'sleep'}},
-  47:{id:47,name:'Supersonic',type:'Normal',cat:'Status',power:0,acc:55,pp:20,eff:{k:'status',status:'confusion'}},
-  48:{id:48,name:'Screech',type:'Normal',cat:'Status',power:0,acc:85,pp:40,eff:{k:'stat',stat:'def',stg:-2,tgt:'foe'}},
-  49:{id:49,name:'Sand Attack',type:'Ground',cat:'Status',power:0,acc:100,pp:15,eff:{k:'stat',stat:'acc',stg:-1,tgt:'foe'}},
-  50:{id:50,name:'Bone Club',type:'Ground',cat:'Physical',power:65,acc:85,pp:20},
-  51:{id:51,name:'Pound',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},
-  52:{id:52,name:'Nuzzle',type:'Electric',cat:'Physical',power:20,acc:100,pp:20,eff:{k:'status',status:'paralysis',ch:100}},
-  53:{id:53,name:'Dig',type:'Ground',cat:'Physical',power:80,acc:100,pp:10},
+// ══════════════════════════════════════════════════════
+//  MOVES & POKEMON DATA
+// ══════════════════════════════════════════════════════
+const MOVES={1:{id:1,name:'Tackle',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},2:{id:2,name:'Growl',type:'Normal',cat:'Status',power:0,acc:100,pp:40,eff:{k:'stat',stat:'atk',stg:-1,tgt:'foe'}},3:{id:3,name:'Vine Whip',type:'Grass',cat:'Physical',power:45,acc:100,pp:25},4:{id:4,name:'Leech Seed',type:'Grass',cat:'Status',power:0,acc:90,pp:10,eff:{k:'status',status:'leech'}},5:{id:5,name:'Razor Leaf',type:'Grass',cat:'Physical',power:55,acc:95,pp:25,hc:true},6:{id:6,name:'Sleep Powder',type:'Grass',cat:'Status',power:0,acc:75,pp:15,eff:{k:'status',status:'sleep'}},7:{id:7,name:'Scratch',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},8:{id:8,name:'Ember',type:'Fire',cat:'Special',power:40,acc:100,pp:25,eff:{k:'status',status:'burn',ch:10}},9:{id:9,name:'Smokescreen',type:'Normal',cat:'Status',power:0,acc:100,pp:20,eff:{k:'stat',stat:'acc',stg:-1,tgt:'foe'}},10:{id:10,name:'Flamethrower',type:'Fire',cat:'Special',power:90,acc:100,pp:15,eff:{k:'status',status:'burn',ch:10}},12:{id:12,name:'Tail Whip',type:'Normal',cat:'Status',power:0,acc:100,pp:30,eff:{k:'stat',stat:'def',stg:-1,tgt:'foe'}},13:{id:13,name:'Bubble',type:'Water',cat:'Special',power:40,acc:100,pp:30},14:{id:14,name:'Water Gun',type:'Water',cat:'Special',power:40,acc:100,pp:25},15:{id:15,name:'Surf',type:'Water',cat:'Special',power:90,acc:100,pp:15},17:{id:17,name:'Body Slam',type:'Normal',cat:'Physical',power:85,acc:100,pp:15,eff:{k:'status',status:'paralysis',ch:30}},18:{id:18,name:'Quick Attack',type:'Normal',cat:'Physical',power:40,acc:100,pp:30},19:{id:19,name:'ThunderShock',type:'Electric',cat:'Special',power:40,acc:100,pp:30,eff:{k:'status',status:'paralysis',ch:10}},20:{id:20,name:'Thunderbolt',type:'Electric',cat:'Special',power:90,acc:100,pp:15,eff:{k:'status',status:'paralysis',ch:10}},22:{id:22,name:'Ice Beam',type:'Ice',cat:'Special',power:90,acc:100,pp:10,eff:{k:'status',status:'freeze',ch:10}},24:{id:24,name:'Psychic',type:'Psychic',cat:'Special',power:90,acc:100,pp:10},25:{id:25,name:'Confusion',type:'Psychic',cat:'Special',power:50,acc:100,pp:25},26:{id:26,name:'Poison Sting',type:'Poison',cat:'Physical',power:15,acc:100,pp:35,eff:{k:'status',status:'poison',ch:30}},27:{id:27,name:'Sludge',type:'Poison',cat:'Special',power:65,acc:100,pp:20,eff:{k:'status',status:'poison',ch:30}},28:{id:28,name:'Earthquake',type:'Ground',cat:'Physical',power:100,acc:100,pp:10},29:{id:29,name:'String Shot',type:'Bug',cat:'Status',power:0,acc:95,pp:40,eff:{k:'stat',stat:'spd',stg:-2,tgt:'foe'}},30:{id:30,name:'Wing Attack',type:'Flying',cat:'Physical',power:60,acc:100,pp:35},31:{id:31,name:'Gust',type:'Flying',cat:'Special',power:40,acc:100,pp:35},32:{id:32,name:'Karate Chop',type:'Fighting',cat:'Physical',power:50,acc:100,pp:25,hc:true},33:{id:33,name:'Lick',type:'Ghost',cat:'Physical',power:30,acc:100,pp:30,eff:{k:'status',status:'paralysis',ch:30}},34:{id:34,name:'Rock Throw',type:'Rock',cat:'Physical',power:50,acc:90,pp:15},35:{id:35,name:'Peck',type:'Flying',cat:'Physical',power:35,acc:100,pp:35},36:{id:36,name:'Bite',type:'Dark',cat:'Physical',power:60,acc:100,pp:25},37:{id:37,name:'Leer',type:'Normal',cat:'Status',power:0,acc:100,pp:30,eff:{k:'stat',stat:'def',stg:-1,tgt:'foe'}},40:{id:40,name:'Splash',type:'Normal',cat:'Status',power:0,acc:100,pp:40},41:{id:41,name:'Acid',type:'Poison',cat:'Special',power:40,acc:100,pp:30},42:{id:42,name:'Headbutt',type:'Normal',cat:'Physical',power:70,acc:100,pp:15},43:{id:43,name:'Low Kick',type:'Fighting',cat:'Physical',power:65,acc:100,pp:20},44:{id:44,name:'Wrap',type:'Normal',cat:'Physical',power:15,acc:85,pp:20},45:{id:45,name:'Absorb',type:'Grass',cat:'Special',power:20,acc:100,pp:25,drain:true},46:{id:46,name:'Sing',type:'Normal',cat:'Status',power:0,acc:55,pp:15,eff:{k:'status',status:'sleep'}},47:{id:47,name:'Supersonic',type:'Normal',cat:'Status',power:0,acc:55,pp:20,eff:{k:'status',status:'confusion'}},48:{id:48,name:'Screech',type:'Normal',cat:'Status',power:0,acc:85,pp:40,eff:{k:'stat',stat:'def',stg:-2,tgt:'foe'}},49:{id:49,name:'Sand Attack',type:'Ground',cat:'Status',power:0,acc:100,pp:15,eff:{k:'stat',stat:'acc',stg:-1,tgt:'foe'}},50:{id:50,name:'Bone Club',type:'Ground',cat:'Physical',power:65,acc:85,pp:20},51:{id:51,name:'Pound',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},52:{id:52,name:'Nuzzle',type:'Electric',cat:'Physical',power:20,acc:100,pp:20,eff:{k:'status',status:'paralysis',ch:100}},53:{id:53,name:'Dig',type:'Ground',cat:'Physical',power:80,acc:100,pp:10}};
+
+const PDB={1:{id:1,name:'Bulbasaur',types:['Grass','Poison'],bs:{hp:45,atk:49,def:45,spa:65,spd:65,spe:45},moves:[1,2,3,4],cr:45,xp:64},4:{id:4,name:'Charmander',types:['Fire'],bs:{hp:39,atk:52,def:43,spa:60,spd:50,spe:65},moves:[7,2,8,9],cr:45,xp:62},7:{id:7,name:'Squirtle',types:['Water'],bs:{hp:44,atk:48,def:65,spa:50,spd:64,spe:43},moves:[1,12,13,14],cr:45,xp:63},10:{id:10,name:'Caterpie',types:['Bug'],bs:{hp:45,atk:30,def:35,spa:20,spd:20,spe:45},moves:[1,29],cr:255,xp:39},13:{id:13,name:'Weedle',types:['Bug','Poison'],bs:{hp:40,atk:35,def:30,spa:20,spd:20,spe:50},moves:[26,29],cr:255,xp:39},16:{id:16,name:'Pidgey',types:['Normal','Flying'],bs:{hp:40,atk:45,def:40,spa:35,spd:35,spe:56},moves:[1,31,35],cr:255,xp:50},19:{id:19,name:'Rattata',types:['Normal'],bs:{hp:30,atk:56,def:35,spa:25,spd:35,spe:72},moves:[1,12,36],cr:255,xp:51},23:{id:23,name:'Ekans',types:['Poison'],bs:{hp:35,atk:60,def:44,spa:40,spd:54,spe:55},moves:[44,37,26,27],cr:255,xp:58},25:{id:25,name:'Pikachu',types:['Electric'],bs:{hp:35,atk:55,def:40,spa:50,spd:50,spe:90},moves:[52,2,18,19],cr:190,xp:112},35:{id:35,name:'Clefairy',types:['Normal'],bs:{hp:70,atk:45,def:48,spa:60,spd:65,spe:35},moves:[51,2,1,17],cr:150,xp:113},37:{id:37,name:'Vulpix',types:['Fire'],bs:{hp:38,atk:41,def:40,spa:50,spd:65,spe:65},moves:[8,12,18,10],cr:190,xp:60},39:{id:39,name:'Jigglypuff',types:['Normal'],bs:{hp:115,atk:45,def:20,spa:45,spd:25,spe:20},moves:[46,51,1],cr:170,xp:76},41:{id:41,name:'Zubat',types:['Poison','Flying'],bs:{hp:40,atk:45,def:35,spa:30,spd:40,spe:55},moves:[33,47],cr:255,xp:54},43:{id:43,name:'Oddish',types:['Grass','Poison'],bs:{hp:45,atk:50,def:55,spa:75,spd:65,spe:30},moves:[51,41,6],cr:255,xp:64},46:{id:46,name:'Paras',types:['Bug','Grass'],bs:{hp:35,atk:70,def:55,spa:45,spd:55,spe:25},moves:[7,29,26,45],cr:190,xp:70},50:{id:50,name:'Diglett',types:['Ground'],bs:{hp:10,atk:55,def:25,spa:35,spd:45,spe:95},moves:[7,49,53],cr:255,xp:81},52:{id:52,name:'Meowth',types:['Normal'],bs:{hp:40,atk:45,def:35,spa:40,spd:40,spe:90},moves:[7,2,36,18],cr:255,xp:69},54:{id:54,name:'Psyduck',types:['Water'],bs:{hp:50,atk:52,def:48,spa:65,spd:50,spe:55},moves:[7,25,14],cr:190,xp:80},56:{id:56,name:'Mankey',types:['Fighting'],bs:{hp:40,atk:80,def:35,spa:35,spd:45,spe:70},moves:[7,37,43,32],cr:190,xp:74},60:{id:60,name:'Poliwag',types:['Water'],bs:{hp:40,atk:50,def:40,spa:40,spd:40,spe:90},moves:[14,42,15],cr:255,xp:60},63:{id:63,name:'Abra',types:['Psychic'],bs:{hp:25,atk:20,def:15,spa:105,spd:55,spe:90},moves:[25,24],cr:200,xp:73},74:{id:74,name:'Geodude',types:['Rock','Ground'],bs:{hp:40,atk:80,def:100,spa:30,spd:30,spe:20},moves:[1,34,28],cr:255,xp:73},92:{id:92,name:'Gastly',types:['Ghost','Poison'],bs:{hp:30,atk:35,def:30,spa:100,spd:35,spe:80},moves:[33,25,47],cr:190,xp:95},100:{id:100,name:'Voltorb',types:['Electric'],bs:{hp:40,atk:30,def:50,spa:55,spd:55,spe:100},moves:[19,48,17,20],cr:190,xp:66},104:{id:104,name:'Cubone',types:['Ground'],bs:{hp:50,atk:50,def:95,spa:40,spd:50,spe:35},moves:[1,34,50],cr:190,xp:87},109:{id:109,name:'Koffing',types:['Poison'],bs:{hp:40,atk:65,def:95,spa:60,spd:45,spe:35},moves:[1,27,48,41],cr:190,xp:114},129:{id:129,name:'Magikarp',types:['Water'],bs:{hp:20,atk:10,def:55,spa:15,spd:20,spe:80},moves:[40],cr:255,xp:20}};
+
+const AREAS={'Route 1':{min:2,max:5,unlock:1,enc:[{d:16,w:45},{d:19,w:45},{d:10,w:5},{d:13,w:5}]},'Viridian Forest':{min:4,max:9,unlock:5,enc:[{d:10,w:30},{d:13,w:30},{d:16,w:20},{d:25,w:15},{d:46,w:5}]},'Mt. Moon':{min:8,max:14,unlock:10,enc:[{d:41,w:40},{d:74,w:30},{d:35,w:20},{d:46,w:10}]},'Cerulean Route':{min:14,max:22,unlock:15,enc:[{d:54,w:30},{d:60,w:30},{d:129,w:20},{d:39,w:15},{d:63,w:5}]},'Power Plant':{min:24,max:35,unlock:25,enc:[{d:100,w:40},{d:25,w:30},{d:52,w:20},{d:63,w:10}]}};
+
+const BATTLE_BG={
+  'Route 1':    {sky:'#87ceeb',skyH:.55,ground:'#4a8c2a',groundH:.45,horizon:'#6ab040'},
+  'Viridian Forest':{sky:'#1a3a0a',skyH:.6,ground:'#1a4010',groundH:.4,horizon:'#2a5a1a'},
+  'Mt. Moon':   {sky:'#0a0a1a',skyH:.6,ground:'#2a2a3a',groundH:.4,horizon:'#1a1a2a'},
+  'Cerulean Route':{sky:'#4a90d9',skyH:.5,ground:'#2060a0',groundH:.5,horizon:'#3070b0'},
+  'Power Plant':{sky:'#1a1a1a',skyH:.6,ground:'#2a2040',groundH:.4,horizon:'#1a1830'},
 };
 
-const POKEMON_DB={
-  1:{id:1,name:'Bulbasaur',types:['Grass','Poison'],bs:{hp:45,atk:49,def:45,spa:65,spd:65,spe:45},moves:[1,2,3,4],cr:45,xp:64},
-  4:{id:4,name:'Charmander',types:['Fire'],bs:{hp:39,atk:52,def:43,spa:60,spd:50,spe:65},moves:[7,2,8,9],cr:45,xp:62},
-  7:{id:7,name:'Squirtle',types:['Water'],bs:{hp:44,atk:48,def:65,spa:50,spd:64,spe:43},moves:[1,12,13,14],cr:45,xp:63},
-  10:{id:10,name:'Caterpie',types:['Bug'],bs:{hp:45,atk:30,def:35,spa:20,spd:20,spe:45},moves:[1,29],cr:255,xp:39},
-  13:{id:13,name:'Weedle',types:['Bug','Poison'],bs:{hp:40,atk:35,def:30,spa:20,spd:20,spe:50},moves:[26,29],cr:255,xp:39},
-  16:{id:16,name:'Pidgey',types:['Normal','Flying'],bs:{hp:40,atk:45,def:40,spa:35,spd:35,spe:56},moves:[1,31,35],cr:255,xp:50},
-  19:{id:19,name:'Rattata',types:['Normal'],bs:{hp:30,atk:56,def:35,spa:25,spd:35,spe:72},moves:[1,12,36],cr:255,xp:51},
-  23:{id:23,name:'Ekans',types:['Poison'],bs:{hp:35,atk:60,def:44,spa:40,spd:54,spe:55},moves:[44,37,26,27],cr:255,xp:58},
-  25:{id:25,name:'Pikachu',types:['Electric'],bs:{hp:35,atk:55,def:40,spa:50,spd:50,spe:90},moves:[52,2,18,19],cr:190,xp:112},
-  35:{id:35,name:'Clefairy',types:['Normal'],bs:{hp:70,atk:45,def:48,spa:60,spd:65,spe:35},moves:[51,2,1,17],cr:150,xp:113},
-  37:{id:37,name:'Vulpix',types:['Fire'],bs:{hp:38,atk:41,def:40,spa:50,spd:65,spe:65},moves:[8,12,18,10],cr:190,xp:60},
-  39:{id:39,name:'Jigglypuff',types:['Normal'],bs:{hp:115,atk:45,def:20,spa:45,spd:25,spe:20},moves:[46,51,1],cr:170,xp:76},
-  41:{id:41,name:'Zubat',types:['Poison','Flying'],bs:{hp:40,atk:45,def:35,spa:30,spd:40,spe:55},moves:[33,47],cr:255,xp:54},
-  43:{id:43,name:'Oddish',types:['Grass','Poison'],bs:{hp:45,atk:50,def:55,spa:75,spd:65,spe:30},moves:[51,41,6],cr:255,xp:64},
-  46:{id:46,name:'Paras',types:['Bug','Grass'],bs:{hp:35,atk:70,def:55,spa:45,spd:55,spe:25},moves:[7,29,26,45],cr:190,xp:70},
-  50:{id:50,name:'Diglett',types:['Ground'],bs:{hp:10,atk:55,def:25,spa:35,spd:45,spe:95},moves:[7,49,53],cr:255,xp:81},
-  52:{id:52,name:'Meowth',types:['Normal'],bs:{hp:40,atk:45,def:35,spa:40,spd:40,spe:90},moves:[7,2,36,18],cr:255,xp:69},
-  54:{id:54,name:'Psyduck',types:['Water'],bs:{hp:50,atk:52,def:48,spa:65,spd:50,spe:55},moves:[7,25,14],cr:190,xp:80},
-  56:{id:56,name:'Mankey',types:['Fighting'],bs:{hp:40,atk:80,def:35,spa:35,spd:45,spe:70},moves:[7,37,43,32],cr:190,xp:74},
-  60:{id:60,name:'Poliwag',types:['Water'],bs:{hp:40,atk:50,def:40,spa:40,spd:40,spe:90},moves:[14,42,15],cr:255,xp:60},
-  63:{id:63,name:'Abra',types:['Psychic'],bs:{hp:25,atk:20,def:15,spa:105,spd:55,spe:90},moves:[25,24],cr:200,xp:73},
-  74:{id:74,name:'Geodude',types:['Rock','Ground'],bs:{hp:40,atk:80,def:100,spa:30,spd:30,spe:20},moves:[1,34,28],cr:255,xp:73},
-  92:{id:92,name:'Gastly',types:['Ghost','Poison'],bs:{hp:30,atk:35,def:30,spa:100,spd:35,spe:80},moves:[33,25,47],cr:190,xp:95},
-  100:{id:100,name:'Voltorb',types:['Electric'],bs:{hp:40,atk:30,def:50,spa:55,spd:55,spe:100},moves:[19,48,17,20],cr:190,xp:66},
-  104:{id:104,name:'Cubone',types:['Ground'],bs:{hp:50,atk:50,def:95,spa:40,spd:50,spe:35},moves:[1,34,50],cr:190,xp:87},
-  109:{id:109,name:'Koffing',types:['Poison'],bs:{hp:40,atk:65,def:95,spa:60,spd:45,spe:35},moves:[1,27,48,41],cr:190,xp:114},
-  129:{id:129,name:'Magikarp',types:['Water'],bs:{hp:20,atk:10,def:55,spa:15,spd:20,spe:80},moves:[40],cr:255,xp:20},
+// ══════════════════════════════════════════════════════
+//  GAME STATE
+// ══════════════════════════════════════════════════════
+const G = {
+  screen: 'title',
+  playerName: '',
+  party: [],
+  bag: { pokeballs: 5, potions: 2, gold: 500 },
+  area: 'Route 1',
+  battle: null,
+  modal: null,
 };
 
-const AREAS={
-  'Route 1':{min:2,max:5,unlock:1,enc:[{d:16,w:45},{d:19,w:45},{d:10,w:5},{d:13,w:5}]},
-  'Viridian Forest':{min:4,max:9,unlock:5,enc:[{d:10,w:30},{d:13,w:30},{d:16,w:20},{d:25,w:15},{d:46,w:5}]},
-  'Mt. Moon':{min:8,max:14,unlock:10,enc:[{d:41,w:40},{d:74,w:30},{d:35,w:20},{d:46,w:10}]},
-  'Cerulean Route':{min:14,max:22,unlock:15,enc:[{d:54,w:30},{d:60,w:30},{d:129,w:20},{d:39,w:15},{d:63,w:5}]},
-  'Power Plant':{min:24,max:35,unlock:25,enc:[{d:100,w:40},{d:25,w:30},{d:52,w:20},{d:63,w:10}]},
-};
-
-// ─── STATE ─────────────────────────────────────────────────────────────────
-const G={
-  screen:'title',
-  playerName:'',
-  party:[],
-  bag:{pokeballs:5},
-  area:'Route 1',
-  battle:null,
-  modal:null,
-};
-
-// ─── UTILS ─────────────────────────────────────────────────────────────────
-function calcStat(base,lv,isHP){return isHP?Math.floor((base*2*lv)/100)+lv+10:Math.floor((base*2*lv)/100)+5;}
+// ══════════════════════════════════════════════════════
+//  GAME UTILS
+// ══════════════════════════════════════════════════════
+function calcStat(b,lv,isHP){return isHP?Math.floor((b*2*lv)/100)+lv+10:Math.floor((b*2*lv)/100)+5;}
 function xpForLv(lv){return Math.floor(Math.pow(lv,3));}
 
-function createMon(dexId,lv){
-  const db=POKEMON_DB[dexId];
-  const stats={hp:calcStat(db.bs.hp,lv,true),atk:calcStat(db.bs.atk,lv,false),def:calcStat(db.bs.def,lv,false),spa:calcStat(db.bs.spa,lv,false),spd:calcStat(db.bs.spd,lv,false),spe:calcStat(db.bs.spe,lv,false)};
-  const moves=db.moves.map(id=>({...MOVES[id],cur:MOVES[id].pp}));
-  return{dexId,name:db.name,types:[...db.types],lv,stats,hp:stats.hp,status:null,stTurns:0,moves,cr:db.cr,xpY:db.xp,xp:xpForLv(lv),xpNext:xpForLv(lv+1),stg:{atk:0,def:0,spa:0,spd:0,spe:0,acc:0}};
+function createMon(dexId, lv) {
+  const db = PDB[dexId];
+  const stats = {hp:calcStat(db.bs.hp,lv,true),atk:calcStat(db.bs.atk,lv,false),def:calcStat(db.bs.def,lv,false),spa:calcStat(db.bs.spa,lv,false),spd:calcStat(db.bs.spd,lv,false),spe:calcStat(db.bs.spe,lv,false)};
+  return {dexId,name:db.name,types:[...db.types],lv,stats,hp:stats.hp,status:null,stTurns:0,moves:db.moves.map(id=>({...MOVES[id],cur:MOVES[id].pp})),cr:db.cr,xpY:db.xp,xp:xpForLv(lv),xpNext:xpForLv(lv+1),stg:{atk:0,def:0,spa:0,spd:0,spe:0,acc:0}};
 }
 
-function stageMult(s){const t=[.25,.28,.33,.4,.5,.66,1,1.5,2,2.5,3,3.5,4];return t[Math.max(0,Math.min(12,s+6))];}
+function stgM(s){return [.25,.28,.33,.4,.5,.66,1,1.5,2,2.5,3,3.5,4][Math.max(0,Math.min(12,s+6))];}
 
-function calcDmg(atk,def,move){
-  if(!move.power||move.cat==='Status')return{dmg:0,tm:1,tt:null,crit:false};
-  const isP=move.cat==='Physical';
-  let a=isP?atk.stats.atk:atk.stats.spa;
-  let d=isP?def.stats.def:def.stats.spd;
-  a*=stageMult(isP?atk.stg.atk:atk.stg.spa);
-  d*=stageMult(isP?def.stg.def:def.stg.spd);
-  if(atk.status==='burn'&&isP)a*=.5;
-  const tm=typeEffect(move.type,def.types);
-  const stab=atk.types.includes(move.type)?1.5:1;
-  const crit=Math.random()<(move.hc?1/8:1/16);
-  const rng=(Math.floor(Math.random()*16)+85)/100;
-  let dmg=Math.floor((((2*atk.lv*move.power*a)/d/50)+2)*stab*tm*(crit?1.5:1)*rng);
-  dmg=tm===0?0:Math.max(1,dmg);
-  return{dmg,tm,tt:typeText(tm),crit,drain:move.drain?Math.floor(dmg/2):0};
+function calcDmg(atk, def, move) {
+  if (!move.power || move.cat==='Status') return {dmg:0,tm:1,tt:null,crit:false,drain:0};
+  const isP = move.cat==='Physical';
+  let a = (isP?atk.stats.atk:atk.stats.spa) * stgM(isP?atk.stg.atk:atk.stg.spa);
+  let d = (isP?def.stats.def:def.stats.spd) * stgM(isP?def.stg.def:def.stg.spd);
+  if (atk.status==='burn'&&isP) a*=.5;
+  const tm = typeEff(move.type, def.types);
+  const stab = atk.types.includes(move.type)?1.5:1;
+  const crit = Math.random()<(move.hc?1/8:1/16);
+  const rng = (Math.floor(Math.random()*16)+85)/100;
+  const dmg = tm===0 ? 0 : Math.max(1, Math.floor((((2*atk.lv*move.power*a)/d/50)+2)*stab*tm*(crit?1.5:1)*rng));
+  return {dmg, tm, tt:typeText(tm), crit, drain:move.drain?Math.floor(dmg/2):0};
 }
 
-function hitCheck(move,atk,def){
-  if(!move.acc)return true;
-  return Math.random()*100<move.acc*stageMult(atk.stg.acc)*stageMult(-def.stg.acc??0);
+function hitCheck(move, atk, def) {
+  return !move.acc || Math.random()*100 < move.acc * stgM(atk.stg.acc) * stgM(-(def.stg.acc||0));
 }
 
-function randomEnc(areaName){
-  const a=AREAS[areaName];
-  const tot=a.enc.reduce((s,e)=>s+e.w,0);
-  let r=Math.random()*tot;
-  for(const e of a.enc){r-=e.w;if(r<=0){const lv=a.min+Math.floor(Math.random()*(a.max-a.min+1));return createMon(e.d,lv);}}
-  const last=a.enc[a.enc.length-1];
-  return createMon(last.d,a.min);
+function randEnc(areaName) {
+  const a = AREAS[areaName];
+  const tot = a.enc.reduce((s,e)=>s+e.w,0);
+  let r = Math.random()*tot;
+  for (const e of a.enc) { r-=e.w; if(r<=0) return createMon(e.d, a.min+Math.floor(Math.random()*(a.max-a.min+1))); }
+  return createMon(a.enc[a.enc.length-1].d, a.min);
 }
 
-function tryCatch(mon){
-  const hpF=mon.hp/mon.stats.hp;
-  const sb=(mon.status==='sleep'||mon.status==='freeze')?2:mon.status?1.5:1;
-  return Math.random()*255<mon.cr*sb*(1-hpF*.7);
+function tryCatch(mon) {
+  const sb = (mon.status==='sleep'||mon.status==='freeze')?2:mon.status?1.5:1;
+  return Math.random()*255 < mon.cr*sb*(1-(mon.hp/mon.stats.hp)*.7);
 }
 
 function hpColor(mon){const p=mon.hp/mon.stats.hp;return p>.5?'#44dd44':p>.25?'#f8c800':'#f83800';}
 function hpPct(mon){return Math.max(0,Math.round((mon.hp/mon.stats.hp)*100))+'%';}
+const SLBL={burn:'BRN',poison:'PSN',paralysis:'PAR',sleep:'SLP',freeze:'FRZ',confusion:'CNF'};
+const SCLR={burn:'#e2621b',poison:'#a040a0',paralysis:'#f8c800',sleep:'#7088a0',freeze:'#98d8d8',confusion:'#f85888'};
+function tbadge(t){return`<span class="type-badge" style="background:${TC_COLOR[t]||'#888'}">${t}</span>`;}
+function sbadge(s){return s?`<span class="status-badge" style="background:${SCLR[s]||'#888'}">${SLBL[s]||''}</span>`:''}
+function spr(id,front=true){return front?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`:`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`;}
 
-function statusLabel(s){return{burn:'BRN',poison:'PSN',paralysis:'PAR',sleep:'SLP',freeze:'FRZ',confusion:'CNF'}[s]||'';}
-function statusColor(s){return{burn:'#e2621b',poison:'#a040a0',paralysis:'#f8c800',sleep:'#7088a0',freeze:'#98d8d8',confusion:'#f85888'}[s]||'#888';}
-
-function spriteURL(id,front=true){
-  return front?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
-              :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`;
-}
-
-function typeBadge(t){return`<span class="type-badge" style="background:${TYPE_COLORS[t]||'#888'}">${t}</span>`;}
-
-function save(){try{localStorage.setItem('pkm_save',JSON.stringify({playerName:G.playerName,party:G.party,bag:G.bag,area:G.area}));}catch(e){}}
-function load(){try{const d=JSON.parse(localStorage.getItem('pkm_save')||'null');if(!d)return false;G.playerName=d.playerName;G.party=d.party;G.bag=d.bag||{pokeballs:5};G.area=d.area||'Route 1';return true;}catch(e){return false;}}
-function hasSave(){return!!localStorage.getItem('pkm_save');}
-
+function saveGame(){try{localStorage.setItem('pkm2',JSON.stringify({playerName:G.playerName,party:G.party,bag:G.bag,area:G.area,owX:OW.player.tx,owY:OW.player.ty}));}catch(e){}}
+function loadGame(){try{const d=JSON.parse(localStorage.getItem('pkm2')||'null');if(!d)return false;G.playerName=d.playerName;G.party=d.party;G.bag=d.bag||{pokeballs:5,potions:2,gold:500};G.area=d.area||'Route 1';if(d.owX)OW.player.tx=d.owX;if(d.owY)OW.player.ty=d.owY;return true;}catch(e){return false;}}
+function hasSave(){return!!localStorage.getItem('pkm2');}
 function healAll(){G.party=G.party.map(p=>({...p,hp:p.stats.hp,status:null,stTurns:0,moves:p.moves.map(m=>({...m,cur:m.pp}))}));}
+function deepClone(o){return JSON.parse(JSON.stringify(o));}
+function addGold(amt){G.bag.gold=(G.bag.gold||0)+amt;}
 
-// ─── RENDER ENGINE ─────────────────────────────────────────────────────────
-function render(){
-  const app=document.getElementById('app');
-  switch(G.screen){
-    case 'title': app.innerHTML=renderTitle(); break;
-    case 'name':  app.innerHTML=renderName(); break;
-    case 'starter': app.innerHTML=renderStarter(); break;
-    case 'overworld': app.innerHTML=renderOverworld(); break;
-    case 'battle': app.innerHTML=renderBattle(); break;
-    case 'party': app.innerHTML=renderParty(); break;
-  }
-  if(G.modal) showModal();
-  bindEvents();
+// ══════════════════════════════════════════════════════
+//  OVERWORLD MAP  (16 cols × 14 rows)
+//  0=path 1=tall_grass 2=tree 3=water
+//  4=building 6=flower 7=lawn
+//  8=pokecenter_door 9=shop_door
+// ══════════════════════════════════════════════════════
+const MAP_DATA = [
+  [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+  [2,7,7,7,7,7,7,7,7,7,7,7,7,7,7,2],
+  [2,4,4,4,7,7,7,7,7,7,4,4,4,4,7,2],
+  [2,8,8,8,7,7,7,7,7,7,9,9,9,9,7,2],
+  [2,7,0,0,0,0,0,0,0,0,0,0,7,7,7,2],
+  [2,7,0,7,7,6,6,7,7,6,6,7,0,7,7,2],
+  [2,7,0,0,0,0,0,0,0,0,0,0,0,7,7,2],
+  [2,7,7,7,7,7,7,7,7,7,7,7,7,7,7,2],
+  [2,2,2,0,2,2,2,2,2,2,2,0,2,2,2,2],
+  [2,1,1,0,1,1,1,1,1,1,1,0,1,1,2,2],
+  [2,1,1,0,1,1,1,1,1,1,1,0,1,1,2,2],
+  [2,2,2,0,2,1,1,1,1,1,2,0,2,2,2,2],
+  [2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,2],
+  [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+];
+const MAP_COLS = 16, MAP_ROWS = 14;
+
+const NPCS = [
+  {tx:5,ty:5,color:'#e060e0',dir:'right',name:'Rosa',lines:['Wild Pokemon live in the tall grass!','The Pokemon Center heals your team for free!']},
+  {tx:9,ty:5,color:'#60a0e0',dir:'left',name:'Lucas',lines:['I heard Pikachu lives in Viridian Forest!','Level up your team to unlock new areas.']},
+];
+
+// ══════════════════════════════════════════════════════
+//  OVERWORLD ENGINE
+// ══════════════════════════════════════════════════════
+const OW = {
+  canvas: null, ctx: null, ts: 40, rafId: null,
+  player: { tx:7, ty:6, px:0, py:0, dir:'down', moving:false, stepF:0, walkCycle:0, targetTX:7, targetTY:6 },
+  holdTimer: null, holdDir: null,
+  dialogNPC: null, dialogLine: 0,
+};
+
+function owInit() {
+  OW.player.px = OW.player.tx * OW.ts;
+  OW.player.py = OW.player.ty * OW.ts;
 }
 
-// ─── TITLE ─────────────────────────────────────────────────────────────────
+function owStart() {
+  if (OW.rafId) return;
+  function loop() { owUpdate(); owDraw(); OW.rafId = requestAnimationFrame(loop); }
+  OW.rafId = requestAnimationFrame(loop);
+}
+
+function owStop() {
+  if (OW.rafId) { cancelAnimationFrame(OW.rafId); OW.rafId = null; }
+  clearTimeout(OW.holdTimer); OW.holdTimer = null;
+}
+
+function owTile(tx, ty) {
+  if (tx<0||ty<0||tx>=MAP_COLS||ty>=MAP_ROWS) return 2;
+  return MAP_DATA[ty][tx];
+}
+
+function owBlocked(tx, ty) {
+  const t = owTile(tx, ty);
+  if (t===2||t===3||t===4) return true;
+  // NPC occupies tile
+  for (const n of NPCS) if (n.tx===tx && n.ty===ty) return true;
+  return false;
+}
+
+function owTryMove(dx, dy) {
+  if (OW.player.moving) return;
+  const nx = OW.player.tx+dx, ny = OW.player.ty+dy;
+  const dir = dx>0?'right':dx<0?'left':dy>0?'down':'up';
+  OW.player.dir = dir;
+  // Face NPC check
+  for (const n of NPCS) {
+    if (n.tx===nx && n.ty===ny) { owDraw(); return; } // face them but don't move
+  }
+  if (owBlocked(nx,ny)) return;
+  // Check building entry
+  const t = owTile(nx,ny);
+  if (t===8) { owEnterPC(); return; }
+  if (t===9) { G.screen='shop'; owStop(); render(); return; }
+  OW.player.targetTX=nx; OW.player.targetTY=ny;
+  OW.player.moving=true; OW.player.stepF=0;
+}
+
+function owEnterPC() {
+  healAll(); SFX.heal();
+  owShowDialog('POKEMON CENTER', ['Welcome!','Your Pokemon have been healed to full health.'], null, ()=>owCloseDialog());
+}
+
+function owUpdate() {
+  const p = OW.player;
+  if (!p.moving) return;
+  const speed = 4; // px per frame
+  p.stepF++;
+  const progress = Math.min(1, p.stepF / (OW.ts / speed));
+  const sx = p.tx * OW.ts, sy = p.ty * OW.ts;
+  const ex = p.targetTX * OW.ts, ey = p.targetTY * OW.ts;
+  p.px = sx + (ex-sx)*progress;
+  p.py = sy + (ey-sy)*progress;
+  if (progress >= 1) {
+    p.tx = p.targetTX; p.ty = p.targetTY;
+    p.px = ex; p.py = ey;
+    p.moving = false; p.stepF = 0;
+    p.walkCycle++;
+    if (p.walkCycle % 2 === 0) SFX.step();
+    owOnArrive();
+  }
+}
+
+function owOnArrive() {
+  const t = owTile(OW.player.tx, OW.player.ty);
+  if (t===1 && Math.random()<0.2) { // 20% encounter in tall grass
+    owStop();
+    const wild = randEnc(G.area);
+    G.battle = {wild, party: G.party.map(deepClone), activeIdx: G.party.findIndex(p=>p.hp>0), escAttempts:0, endResult:null, msgs:[], msgIdx:0, phase:'reading', pendingPhase:'menu'};
+    G.battle.msgs = [`A wild ${wild.name} appeared!`];
+    G.screen = 'battle';
+    playMusic('battle');
+    render();
+  }
+}
+
+function owAction() {
+  // Check NPC in facing direction
+  const p = OW.player;
+  const dx = p.dir==='right'?1:p.dir==='left'?-1:0;
+  const dy = p.dir==='down'?1:p.dir==='up'?-1:0;
+  const fx=p.tx+dx, fy=p.ty+dy;
+  for (const n of NPCS) {
+    if (n.tx===fx && n.ty===fy) {
+      OW.dialogNPC = n; OW.dialogLine = 0;
+      owShowDialog(n.name, n.lines, n, ()=>owCloseDialog());
+      return;
+    }
+  }
+  // Check sign
+  if (owTile(fx,fy)===5) {
+    owShowDialog('Sign', ['Welcome to Pallet Town!','Head south into the tall grass to find wild Pokemon.'], null, ()=>owCloseDialog());
+  }
+}
+
+function owShowDialog(title, lines, npc, onDone) {
+  OW.dialogData = {title, lines, idx:0, onDone};
+  const el = document.getElementById('ow-dialog');
+  if (!el) return;
+  el.style.display = 'block';
+  owUpdateDialog();
+}
+
+function owUpdateDialog() {
+  const d = OW.dialogData;
+  if (!d) return;
+  const el = document.getElementById('ow-dialog');
+  if (!el) return;
+  el.innerHTML = `<div style="color:#f8c800;font-size:12px;font-weight:800;margin-bottom:4px">${d.title}</div><div style="color:#fff;font-size:15px;line-height:1.4">${d.lines[d.idx]}</div><div style="color:#666;font-size:11px;margin-top:8px;text-align:right">▼ tap</div>`;
+}
+
+function owAdvanceDialog() {
+  const d = OW.dialogData;
+  if (!d) return;
+  d.idx++;
+  if (d.idx >= d.lines.length) { d.onDone(); }
+  else owUpdateDialog();
+}
+
+function owCloseDialog() {
+  const el = document.getElementById('ow-dialog');
+  if (el) el.style.display = 'none';
+  OW.dialogData = null;
+}
+
+// ── CANVAS DRAW ──
+function owDraw() {
+  const c = OW.canvas, ctx = OW.ctx;
+  if (!c||!ctx) return;
+  const ts = OW.ts;
+  const p = OW.player;
+
+  // Camera: center on player pixel pos
+  const camX = p.px - c.width/2 + ts/2;
+  const camY = p.py - c.height/2 + ts/2;
+
+  ctx.clearRect(0,0,c.width,c.height);
+
+  // Draw tiles
+  const startTX = Math.max(0, Math.floor(camX/ts));
+  const endTX   = Math.min(MAP_COLS-1, Math.ceil((camX+c.width)/ts));
+  const startTY = Math.max(0, Math.floor(camY/ts));
+  const endTY   = Math.min(MAP_ROWS-1, Math.ceil((camY+c.height)/ts));
+
+  for (let ty=startTY; ty<=endTY; ty++) {
+    for (let tx=startTX; tx<=endTX; tx++) {
+      const sx = tx*ts - camX, sy = ty*ts - camY;
+      drawTile(ctx, owTile(tx,ty), sx, sy, ts);
+    }
+  }
+
+  // Draw NPCs
+  for (const n of NPCS) {
+    const sx = n.tx*ts - camX, sy = n.ty*ts - camY;
+    if (sx>-ts&&sx<c.width&&sy>-ts&&sy<c.height) drawNPC(ctx, n, sx, sy, ts);
+  }
+
+  // Draw player
+  drawPlayer(ctx, p.px-camX, p.py-camY, p.dir, p.walkCycle, ts);
+}
+
+function drawTile(ctx, type, sx, sy, ts) {
+  const colors = {
+    0: '#c8a870', // path
+    1: '#2d8a2d', // tall grass
+    2: null,      // tree (special)
+    3: '#4480c8', // water
+    4: '#7a7a8a', // building
+    5: '#c8a870', // sign (path + sign drawn on top)
+    6: '#4aaa4a', // flower lawn
+    7: '#5aaa5a', // lawn
+    8: '#7a7a8a', // pokecenter door
+    9: '#7a7a8a', // shop door
+  };
+
+  // Base color
+  ctx.fillStyle = colors[type] || '#888';
+  ctx.fillRect(sx, sy, ts, ts);
+
+  if (type===2) {
+    // Grass under tree
+    ctx.fillStyle = '#3a7a3a';
+    ctx.fillRect(sx,sy,ts,ts);
+    // Trunk
+    ctx.fillStyle = '#7a5a30';
+    ctx.fillRect(sx+ts*.35,sy+ts*.55,ts*.3,ts*.45);
+    // Leaves
+    ctx.fillStyle = '#1a6a1a';
+    ctx.beginPath(); ctx.arc(sx+ts*.5,sy+ts*.35,ts*.38,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#2a8a2a';
+    ctx.beginPath(); ctx.arc(sx+ts*.4,sy+ts*.28,ts*.26,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(sx+ts*.62,sy+ts*.30,ts*.22,0,Math.PI*2); ctx.fill();
+  } else if (type===1) {
+    // Tall grass blades
+    ctx.fillStyle = '#1a6a1a';
+    for (let i=0;i<4;i++) {
+      const bx = sx + ts*(.15+i*.2), by = sy+ts*.1;
+      ctx.fillRect(bx, by, ts*.07, ts*.5);
+    }
+  } else if (type===3) {
+    // Water shimmer
+    ctx.fillStyle = '#5090d8';
+    ctx.fillRect(sx,sy,ts,ts*.5);
+    ctx.fillStyle = '#3a70b8';
+    ctx.fillRect(sx,sy+ts*.5,ts,ts*.5);
+    // Wave lines
+    ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(sx+ts*.1,sy+ts*.3); ctx.bezierCurveTo(sx+ts*.3,sy+ts*.2,sx+ts*.6,sy+ts*.4,sx+ts*.9,sy+ts*.3); ctx.stroke();
+  } else if (type===4||type===8||type===9) {
+    // Building wall
+    ctx.fillStyle = '#9090a0';
+    ctx.fillRect(sx,sy,ts,ts);
+    if (type===4) {
+      // Window
+      ctx.fillStyle='#aad8f8'; ctx.fillRect(sx+ts*.2,sy+ts*.2,ts*.25,ts*.25);
+      ctx.fillStyle='#aad8f8'; ctx.fillRect(sx+ts*.55,sy+ts*.2,ts*.25,ts*.25);
+    } else {
+      // Door
+      ctx.fillStyle='#6a3a1a'; ctx.fillRect(sx+ts*.3,sy+ts*.35,ts*.4,ts*.65);
+      ctx.fillStyle='#f8c820'; ctx.beginPath(); ctx.arc(sx+ts*.67,sy+ts*.65,ts*.06,0,Math.PI*2); ctx.fill();
+      // Sign above door
+      if (type===8) { ctx.fillStyle='#ff6666'; } else { ctx.fillStyle='#6666ff'; }
+      ctx.fillRect(sx+ts*.2,sy+ts*.05,ts*.6,ts*.25);
+      ctx.fillStyle='#fff'; ctx.font=`bold ${ts*.12}px sans-serif`; ctx.textAlign='center';
+      ctx.fillText(type===8?'PC':'SHOP', sx+ts*.5, sy+ts*.22);
+    }
+  } else if (type===6) {
+    // Flowers
+    const fc=['#f8c820','#f840a0','#f86020'];
+    for (let i=0;i<3;i++) {
+      const fx=sx+ts*(.2+i*.28), fy=sy+ts*(.3+i*.2);
+      ctx.fillStyle=fc[i]; ctx.beginPath(); ctx.arc(fx,fy,ts*.1,0,Math.PI*2); ctx.fill();
+    }
+  } else if (type===5) {
+    // Sign post
+    ctx.fillStyle='#8a6030'; ctx.fillRect(sx+ts*.45,sy+ts*.4,ts*.1,ts*.6);
+    ctx.fillStyle='#c8903a'; ctx.fillRect(sx+ts*.2,sy+ts*.15,ts*.6,ts*.3);
+  }
+
+  // Subtle grid line
+  ctx.strokeStyle='rgba(0,0,0,.08)'; ctx.lineWidth=.5;
+  ctx.strokeRect(sx,sy,ts,ts);
+}
+
+function drawPlayer(ctx, sx, sy, dir, walkCycle, ts) {
+  const cx = sx + ts/2, cy = sy + ts/2;
+  const s = ts/40; // scale factor
+  const step = Math.floor(walkCycle/2)%2;
+
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,.2)';
+  ctx.beginPath(); ctx.ellipse(cx,cy+14*s,8*s,3*s,0,0,Math.PI*2); ctx.fill();
+
+  // Legs (animated)
+  ctx.fillStyle='#223388';
+  if (dir==='down'||dir==='up') {
+    ctx.fillRect(cx-7*s+(step?5*s:0),cy+4*s,5*s,10*s);
+    ctx.fillRect(cx+2*s-(step?5*s:0),cy+4*s,5*s,10*s);
+  } else {
+    ctx.fillRect(cx-6*s,cy+4*s,5*s,10*s);
+    ctx.fillRect(cx+1*s,cy+4*s,5*s,10*s);
+  }
+
+  // Body (jacket)
+  ctx.fillStyle='#cc2222';
+  ctx.fillRect(cx-8*s,cy-5*s,16*s,11*s);
+
+  // Arms
+  ctx.fillStyle='#cc2222';
+  if (dir==='left'||dir==='right') {
+    ctx.fillStyle='#f5c5a0';
+    ctx.fillRect(dir==='left'?cx-11*s:cx+7*s,cy-3*s,4*s,8*s);
+  } else {
+    ctx.fillRect(cx-11*s,cy-3*s,4*s,8*s);
+    ctx.fillRect(cx+7*s,cy-3*s,4*s,8*s);
+  }
+
+  // Head
+  ctx.fillStyle='#f5c5a0';
+  ctx.beginPath(); ctx.arc(cx,cy-12*s,7*s,0,Math.PI*2); ctx.fill();
+
+  // Hat
+  ctx.fillStyle='#cc0000';
+  ctx.fillRect(cx-8*s,cy-20*s,16*s,7*s);
+  ctx.fillRect(cx-10*s,cy-14*s,20*s,2*s); // brim
+  // Hat logo
+  ctx.fillStyle='#fff';
+  ctx.fillRect(cx-2*s,cy-18*s,4*s,3*s);
+
+  // Eyes (face based on direction)
+  if (dir==='down') {
+    ctx.fillStyle='#333'; ctx.fillRect(cx-4*s,cy-12*s,2*s,2*s); ctx.fillRect(cx+2*s,cy-12*s,2*s,2*s);
+  } else if (dir==='up') {
+    // back of head, no eyes
+  } else {
+    ctx.fillStyle='#333'; ctx.fillRect(dir==='left'?cx-5*s:cx+3*s,cy-12*s,2*s,2*s);
+  }
+}
+
+function drawNPC(ctx, npc, sx, sy, ts) {
+  const cx=sx+ts/2, cy=sy+ts/2, s=ts/40;
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,.15)';
+  ctx.beginPath(); ctx.ellipse(cx,cy+14*s,7*s,3*s,0,0,Math.PI*2); ctx.fill();
+  // Legs
+  ctx.fillStyle='#555';
+  ctx.fillRect(cx-6*s,cy+4*s,5*s,10*s);
+  ctx.fillRect(cx+1*s,cy+4*s,5*s,10*s);
+  // Body
+  ctx.fillStyle=npc.color;
+  ctx.fillRect(cx-7*s,cy-5*s,14*s,11*s);
+  // Head
+  ctx.fillStyle='#f5c5a0';
+  ctx.beginPath(); ctx.arc(cx,cy-12*s,7*s,0,Math.PI*2); ctx.fill();
+  // Hair
+  ctx.fillStyle=npc.color;
+  ctx.fillRect(cx-8*s,cy-20*s,16*s,9*s);
+  // Eyes
+  ctx.fillStyle='#333';
+  if (npc.dir==='down') { ctx.fillRect(cx-4*s,cy-12*s,2*s,2*s); ctx.fillRect(cx+2*s,cy-12*s,2*s,2*s); }
+  // Speech bubble indicator
+  ctx.fillStyle='#fff'; ctx.font=`bold ${ts*.2}px sans-serif`; ctx.textAlign='center';
+  ctx.fillText('!',cx,cy-22*s);
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER ENGINE
+// ══════════════════════════════════════════════════════
+function render() {
+  getACtx(); // ensure audio ready on interaction
+  const app = document.getElementById('app');
+
+  if (G.screen === 'overworld') {
+    if (!document.getElementById('ow-canvas')) mountOW(app);
+    owUpdateHUD();
+    owStart();
+    if (_musicTrack !== 'overworld') playMusic('overworld');
+  } else {
+    owStop();
+    app.innerHTML = '';
+    const html = G.screen==='title'?renderTitle():G.screen==='name'?renderName():G.screen==='starter'?renderStarter():G.screen==='battle'?renderBattle():G.screen==='shop'?renderShop():G.screen==='party'?renderParty():'';
+    app.innerHTML = html;
+    bindEvents();
+  }
+  if (G.modal) showModal();
+}
+
+function mountOW(container) {
+  container.innerHTML = `
+  <div id="ow-wrap">
+    <canvas id="ow-canvas"></canvas>
+    <div id="ow-hud">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="color:#f8c800;font-weight:800;font-size:14px">${G.playerName}</span>
+        <span style="color:#aaa;font-size:12px">${G.area}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="color:#f8c820;font-size:13px;font-weight:700">💰${G.bag.gold||0}</span>
+        <span style="color:#fff;font-size:13px;font-weight:700">◎${G.bag.pokeballs}</span>
+        <button id="mute-btn" class="hud-btn" onclick="toggleMute()">${_muted?'🔇':'🔊'}</button>
+        <button class="hud-btn" onclick="owStop();G.screen='party';render()">Party</button>
+      </div>
+    </div>
+    <div id="ow-dialog" onclick="owAdvanceDialog()"></div>
+    <div id="ow-btns">
+      <div class="dpad">
+        <div></div>
+        <div class="dpad-btn" id="dp-up" ontouchstart="e.preventDefault();dpadPress(0,-1)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(0,-1)" onmouseup="dpadRelease()">↑</div>
+        <div></div>
+        <div class="dpad-btn" id="dp-left" ontouchstart="e.preventDefault();dpadPress(-1,0)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(-1,0)" onmouseup="dpadRelease()">←</div>
+        <div class="dpad-center"></div>
+        <div class="dpad-btn" id="dp-right" ontouchstart="e.preventDefault();dpadPress(1,0)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(1,0)" onmouseup="dpadRelease()">→</div>
+        <div></div>
+        <div class="dpad-btn" id="dp-down" ontouchstart="e.preventDefault();dpadPress(0,1)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(0,1)" onmouseup="dpadRelease()">↓</div>
+        <div></div>
+      </div>
+      <div class="action-btns">
+        <div class="action-btn" style="background:#cc0000;color:#fff" ontouchstart="e.preventDefault();owAction()" onmousedown="owAction()">A</div>
+        <div class="action-btn" style="background:#222;color:#aaa;font-size:12px" ontouchstart="e.preventDefault();owStop();G.screen='shop';render()" onmousedown="owStop();G.screen='shop';render()">🏪</div>
+      </div>
+    </div>
+  </div>`;
+
+  const canvas = document.getElementById('ow-canvas');
+  const wrap = document.getElementById('ow-wrap');
+  canvas.width = wrap.offsetWidth;
+  canvas.height = wrap.offsetHeight;
+  OW.canvas = canvas; OW.ctx = canvas.getContext('2d');
+  OW.ts = Math.min(48, Math.floor(canvas.width / 9));
+  owInit();
+}
+
+function owUpdateHUD() {
+  const hud = document.getElementById('ow-hud');
+  if (!hud) return;
+  const gold = document.querySelector('#ow-hud .gold-val');
+}
+
+let _dpadDX=0,_dpadDY=0;
+function dpadPress(dx,dy) {
+  _dpadDX=dx; _dpadDY=dy;
+  owTryMove(dx,dy);
+  clearTimeout(OW.holdTimer);
+  OW.holdTimer=setTimeout(function repeat(){owTryMove(_dpadDX,_dpadDY);OW.holdTimer=setTimeout(repeat,130);},380);
+}
+function dpadRelease(){clearTimeout(OW.holdTimer);OW.holdTimer=null;}
+
+// ══════════════════════════════════════════════════════
+//  SCREENS
+// ══════════════════════════════════════════════════════
 function renderTitle(){
   const has=hasSave();
   return`<div class="screen" style="align-items:center;justify-content:center;gap:24px">
     <div style="text-align:center">
-      <div style="font-size:52px;font-weight:900;color:#f8c800;letter-spacing:4px;text-shadow:3px 3px 0 #cc0000">POKEMON</div>
-      <div style="color:#aaa;letter-spacing:2px;font-size:14px">Adventure Game</div>
+      <div style="font-size:50px;font-weight:900;color:#f8c800;letter-spacing:4px;text-shadow:3px 3px 0 #cc0000">POKEMON</div>
+      <div style="color:#aaa;font-size:13px;letter-spacing:2px">Adventure Game</div>
     </div>
-    <div style="font-size:80px;line-height:1">◗</div>
+    <div style="font-size:90px;line-height:1;text-shadow:0 4px 20px rgba(255,100,0,.5)">◗</div>
     <div style="width:100%;display:flex;flex-direction:column;gap:12px">
-      ${has?`<button class="btn-blue" onclick="go('continue')">CONTINUE</button>`:''}
-      <button class="btn-red" onclick="go('new')">NEW GAME</button>
+      ${has?`<button class="btn-blue" onclick="navGo('continue')">CONTINUE</button>`:''}
+      <button class="btn-red" onclick="navGo('new')">NEW GAME</button>
     </div>
-    <div style="color:#555;font-size:12px">Tap a button to start your adventure!</div>
+    <div style="color:#555;font-size:12px">Music plays automatically — needs one tap first!</div>
   </div>`;
 }
 
-// ─── NAME INPUT ────────────────────────────────────────────────────────────
-function renderName(){
-  return`<div class="screen" style="justify-content:center;gap:20px">
-    <div style="text-align:center">
-      <div class="gold" style="font-size:24px;font-weight:800">What's your name?</div>
-      <div style="color:#aaa;font-size:13px;margin-top:6px">Professor Oak wants to know!</div>
-    </div>
-    <input id="nameInput" type="text" maxlength="12" placeholder="Enter trainer name"
-      style="background:#0d0d1f;border:2px solid #4466bb;border-radius:10px;padding:14px 16px;color:#fff;font-size:18px;width:100%;outline:none"
-      value="${G.playerName||''}" />
-    <button class="btn-red" onclick="go('nameNext')">NEXT →</button>
-  </div>`;
-}
+let _starterChosen=null;
+function renderName(){return`<div class="screen" style="justify-content:center;gap:20px"><div style="text-align:center"><div class="gold" style="font-size:24px;font-weight:800">What's your name?</div><div style="color:#aaa;font-size:13px;margin-top:6px">Professor Oak needs to know!</div></div><input id="nameIn" type="text" maxlength="12" placeholder="Trainer name" style="background:#0d0d1f;border:2px solid #4466bb;border-radius:10px;padding:14px 16px;color:#fff;font-size:18px;width:100%;outline:none" value="${G.playerName||''}"/><button class="btn-red" onclick="navGo('nameNext')">NEXT →</button></div>`;}
 
-// ─── STARTER SELECT ────────────────────────────────────────────────────────
-let _chosen=null;
 function renderStarter(){
-  const starters=[
-    {id:1,name:'Bulbasaur',col:'#5db85a',types:'Grass / Poison',desc:'Steady. Leech Seed drains foes.'},
-    {id:4,name:'Charmander',col:'#e2621b',types:'Fire',desc:'Fast attacker. Burns opponents.'},
-    {id:7,name:'Squirtle',col:'#4a90d9',types:'Water',desc:'Tough defender. Great early game.'},
-  ];
-  return`<div class="screen" style="gap:16px">
-    <div style="text-align:center">
-      <div class="gold" style="font-size:22px;font-weight:800">Choose Your Starter!</div>
-      <div style="color:#aaa;font-size:13px">Pick the Pokemon that begins your journey.</div>
-    </div>
-    ${starters.map(s=>`
-      <div onclick="chooseStarter(${s.id})" style="background:#141428;border-radius:14px;border:${_chosen===s.id?`3px solid ${s.col}`:'2px solid #333'};padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;${_chosen===s.id?`background:#2a2a45`:''}" >
-        <img src="${spriteURL(s.id)}" class="sprite" width="72" height="72" style="image-rendering:pixelated">
-        <div style="flex:1">
-          <div style="font-size:19px;font-weight:800;color:${s.col}">${s.name}</div>
-          <div style="margin:4px 0">${s.types.split(' / ').map(t=>typeBadge(t)).join('')}</div>
-          <div style="color:#ccc;font-size:12px">${s.desc}</div>
-        </div>
-        ${_chosen===s.id?`<span style="font-size:22px;color:#44dd44">✓</span>`:''}
-      </div>`).join('')}
-    <button class="${_chosen?'btn-red':'btn-disabled'}" onclick="go('startGame')" ${_chosen?'':'disabled'}>START ADVENTURE →</button>
-  </div>`;
+  const starters=[{id:1,name:'Bulbasaur',col:'#5db85a',t:'Grass / Poison',d:'Steady grower. Leech Seed + status control.'},{id:4,name:'Charmander',col:'#e2621b',t:'Fire',d:'Fast attacker. Burns opponents hard.'},{id:7,name:'Squirtle',col:'#4a90d9',t:'Water',d:'Tough defender. Great type coverage.'}];
+  return`<div class="screen" style="gap:14px"><div style="text-align:center"><div class="gold" style="font-size:22px;font-weight:800">Choose Your Starter!</div><div style="color:#aaa;font-size:13px">The Pokemon that begins your journey.</div></div>
+  ${starters.map(s=>`<div onclick="chooseStarter(${s.id})" style="background:#141428;border-radius:14px;border:${_starterChosen===s.id?`3px solid ${s.col}`:' 2px solid #333'};padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;${_starterChosen===s.id?'background:#2a2a45':''}">
+    <img src="${spr(s.id)}" width="72" height="72" style="image-rendering:pixelated">
+    <div style="flex:1"><div style="font-size:19px;font-weight:800;color:${s.col}">${s.name}</div><div style="margin:4px 0">${s.t.split(' / ').map(t=>tbadge(t)).join('')}</div><div style="color:#ccc;font-size:12px">${s.d}</div></div>
+    ${_starterChosen===s.id?'<span style="font-size:22px;color:#44dd44">✓</span>':''}
+  </div>`).join('')}
+  <button class="${_starterChosen?'btn-red':'btn-disabled'}" onclick="navGo('startGame')" ${_starterChosen?'':'disabled'}>START ADVENTURE →</button></div>`;
 }
 
-// ─── OVERWORLD ─────────────────────────────────────────────────────────────
-function renderOverworld(){
-  const lead=G.party[0];
-  const maxLv=G.party.length?Math.max(...G.party.map(p=>p.lv)):1;
-  const areaInfo=AREAS[G.area];
-  return`<div class="screen" style="gap:14px;padding-top:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div class="gold" style="font-size:16px;font-weight:700">Trainer: ${G.playerName}</div>
-        <div style="color:#aaa;font-size:12px">${G.area}</div>
-      </div>
-      <div style="background:#2a2a45;border-radius:10px;padding:6px 14px;font-size:16px;font-weight:700">◎ ${G.bag.pokeballs}</div>
-    </div>
-
-    ${lead?`<div style="background:#141428;border-radius:16px;padding:12px;display:flex;align-items:center;gap:10px;border:1px solid #2a2a55">
-      <img src="${spriteURL(lead.dexId)}" class="sprite" width="64" height="64">
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px;font-weight:800">${lead.name}</span>
-          <span style="color:#aaa;font-size:13px">Lv.${lead.lv}</span>
-          ${lead.status?`<span class="status-badge" style="background:${statusColor(lead.status)}">${statusLabel(lead.status)}</span>`:''}
-        </div>
-        <div style="margin:4px 0">${lead.types.map(t=>typeBadge(t)).join('')}</div>
-        <div class="hp-row"><span class="hp-label">HP</span><div class="hp-bar-wrap"><div class="hp-track"><div class="hp-fill" style="width:${hpPct(lead)};background:${hpColor(lead)}"></div></div></div></div>
-        <div class="hp-nums" style="color:${hpColor(lead)}">${lead.hp}/${lead.stats.hp}</div>
-      </div>
-    </div>`:'<div style="color:#555;text-align:center">No Pokemon in party</div>'}
-
-    <div style="display:flex;align-items:center;gap:10px">
-      <div onclick="openAreaPicker()" style="flex:1;background:#0d0d1f;border:1px solid #333;border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;cursor:pointer">
-        <span style="font-size:14px">📍 ${G.area}</span><span style="color:#aaa">▼</span>
-      </div>
-      <div class="gold" style="font-weight:700;font-size:13px">Lv ${areaInfo.min}–${areaInfo.max}</div>
-    </div>
-
-    <button class="btn-green" style="padding:20px;font-size:20px" onclick="go('explore')">🌿 Walk in Tall Grass<br><span style="font-size:13px;font-weight:400;color:#a8e8a8">Random wild encounter!</span></button>
-
-    <div class="btn-grid" style="gap:10px">
-      <button class="btn-dark" onclick="G.screen='party';render()">🏆 Party<br><span style="font-size:11px;font-weight:400;color:#888">${G.party.length}/6 Pokemon</span></button>
-      <button class="btn-dark" style="background:#0d1f0d;border-color:#2a5522" onclick="go('rest')">+ Rest<br><span style="font-size:11px;font-weight:400;color:#888">Heal all Pokemon</span></button>
-      <button class="btn-dark" style="grid-column:1/-1" onclick="go('save')">💾 Save Game</button>
-    </div>
-  </div>`;
-}
-
-// ─── BATTLE ────────────────────────────────────────────────────────────────
 function renderBattle(){
-  const b=G.battle;
-  const p=b.party[b.activeIdx];
-  const w=b.wild;
-
-  const wildHPbar=`<div class="hp-track" style="width:150px"><div class="hp-fill" style="width:${hpPct(w)};background:${hpColor(w)}"></div></div>`;
-  const playerHPbar=`<div class="hp-track"><div class="hp-fill" style="width:${hpPct(p)};background:${hpColor(p)}"></div></div>`;
+  const b=G.battle, p=b.party[b.activeIdx], w=b.wild;
+  const bg=BATTLE_BG[G.area]||BATTLE_BG['Route 1'];
+  const sceneH=Math.round(window.innerHeight*.45);
   const xpPct=()=>{const base=xpForLv(p.lv),next=p.xpNext,cur=p.xp;return next===base?100:Math.max(0,Math.round(((cur-base)/(next-base))*100));};
 
-  const wildSection=`<div class="battle-wild">
-    <div style="flex:1">
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="mon-name">${w.name}</span>
-        ${w.status?`<span class="status-badge" style="background:${statusColor(w.status)}">${statusLabel(w.status)}</span>`:''}
+  // Draw battle background as canvas-like CSS
+  const bgStyle=`background:linear-gradient(180deg,${bg.sky} 0%,${bg.sky} ${bg.skyH*100}%,${bg.horizon} ${bg.skyH*100}%,${bg.ground} 100%);`;
+
+  const ui = b.phase==='reading'
+    ?`<div class="msg-box" onclick="bAdvMsg()"><div class="msg-text">${b.msgs[b.msgIdx]||''}</div><div class="tap-hint">${b.msgIdx<b.msgs.length-1?'▼ tap':'▼ tap to continue'}</div></div>`
+    :b.phase==='menu'
+    ?`<div class="menu-wrap"><div style="color:#ccc;font-size:13px;margin-bottom:2px">What will ${p.name} do?</div><div class="menu-grid">
+        <div class="menu-btn" onclick="bPhase('fight')"><span style="font-size:20px">⚔️</span>FIGHT</div>
+        <div class="menu-btn" onclick="bBag()"><span style="font-size:20px">🎒</span>BAG<br><span style="font-size:10px;color:#aaa">◎${G.bag.pokeballs} 💊${G.bag.potions}</span></div>
+        <div class="menu-btn" onclick="bPhase('pokemon')"><span style="font-size:20px">🏆</span>POKEMON</div>
+        <div class="menu-btn" onclick="bRun()"><span style="font-size:20px">👟</span>RUN</div>
+      </div></div>`
+    :b.phase==='fight'
+    ?`<div class="move-list">${p.moves.map(m=>`<div class="move-btn ${m.cur===0?'depleted':''}" onclick="bMove(${m.id})" style="border-color:${TC_COLOR[m.type]||'#555'}"><div><div style="font-size:13px;font-weight:700;color:#fff">${m.name}</div><div style="font-size:10px;color:#aaa">PP ${m.cur}/${m.pp} · ${m.cat}${m.power?` · ${m.power}pwr`:''}</div></div><span class="type-badge" style="background:${TC_COLOR[m.type]||'#888'};font-size:9px">${m.type}</span></div>`).join('')}<button class="btn-dark" style="margin-top:4px;padding:8px" onclick="bPhase('menu')">← BACK</button></div>`
+    :b.phase==='bag_items'
+    ?`<div class="move-list"><div style="color:#f8c800;font-weight:800;margin-bottom:6px">Use Item</div>
+        ${G.bag.potions>0?`<div class="move-btn" onclick="bUsePotion()"><div><div style="color:#fff;font-weight:700">💊 Potion ×${G.bag.potions}</div><div style="color:#aaa;font-size:11px">Restore 30 HP</div></div></div>`:''  }
+        <div class="move-btn" onclick="bThrowBall()" style="${G.bag.pokeballs>0?'':'opacity:.4'}"><div><div style="color:#fff;font-weight:700">◎ Poke Ball ×${G.bag.pokeballs}</div><div style="color:#aaa;font-size:11px">Try to catch the wild Pokemon!</div></div></div>
+        <button class="btn-dark" style="margin-top:4px;padding:8px" onclick="bPhase('menu')">← BACK</button></div>`
+    :b.phase==='pokemon'
+    ?`<div class="move-list"><div style="color:#f8c800;font-weight:800;margin-bottom:6px">Switch Pokemon</div>${b.party.map((m,i)=>`<div class="move-btn${m.hp===0?' depleted':''}" onclick="bSwitch(${i})" style="${i===b.activeIdx?'border-color:#f8c800':''}"><div style="display:flex;align-items:center;gap:8px"><img src="${spr(m.dexId)}" width="32" height="32" style="image-rendering:pixelated"><div><div style="color:#fff;font-weight:700">${m.name} Lv${m.lv}</div><div style="color:${hpColor(m)};font-size:11px">${m.hp}/${m.stats.hp} HP</div></div></div>${i===b.activeIdx?'<span class="gold">●</span>':''}</div>`).join('')}<button class="btn-dark" style="margin-top:4px;padding:8px" onclick="bPhase('menu')">← BACK</button></div>`
+    :`<div class="msg-box"><div class="msg-text">...</div></div>`;
+
+  return`<div class="battle-wrap">
+    <div class="battle-scene" style="${bgStyle}height:${sceneH}px">
+      <!-- Wild Pokemon top-right -->
+      <div style="position:absolute;top:${sceneH*.05}px;right:10px">
+        <img id="wild-spr" src="${spr(w.dexId,true)}" width="${Math.round(sceneH*.35)}" height="${Math.round(sceneH*.35)}" style="image-rendering:pixelated;filter:drop-shadow(2px 4px 4px rgba(0,0,0,.4))">
       </div>
-      <div class="mon-level">Lv. ${w.lv}</div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span class="hp-label" style="color:#333">HP</span>${wildHPbar}</div>
-      <div style="margin-top:4px">${w.types.map(t=>typeBadge(t)).join('')}</div>
+      <!-- Player Pokemon bottom-left -->
+      <div style="position:absolute;bottom:${sceneH*.0}px;left:10px">
+        <img src="${spr(p.dexId,false)}" width="${Math.round(sceneH*.38)}" height="${Math.round(sceneH*.38)}" style="image-rendering:pixelated;filter:drop-shadow(-2px 4px 4px rgba(0,0,0,.4))">
+      </div>
+      <!-- Wild info -->
+      <div class="battle-wild-info" style="min-width:140px">
+        <div style="display:flex;align-items:center;gap:4px"><span class="mon-name">${w.name}</span>${sbadge(w.status)}</div>
+        <div class="mon-level">Lv.${w.lv}</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:2px"><span style="color:#555;font-size:10px;font-weight:700">HP</span><div style="flex:1;min-width:90px"><div class="hp-track"><div class="hp-fill" style="width:${hpPct(w)};background:${hpColor(w)}"></div></div></div></div>
+        <div style="margin-top:3px">${w.types.map(t=>tbadge(t)).join('')}</div>
+      </div>
+      <!-- Player info -->
+      <div class="battle-player-info" style="min-width:140px">
+        <div style="display:flex;align-items:center;gap:4px;justify-content:flex-end"><span class="mon-name">${p.name}</span>${sbadge(p.status)}</div>
+        <div class="mon-level" style="text-align:right">Lv.${p.lv}</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:2px"><span style="color:#555;font-size:10px;font-weight:700">HP</span><div style="flex:1;min-width:90px"><div class="hp-track"><div class="hp-fill" style="width:${hpPct(p)};background:${hpColor(p)}"></div></div></div></div>
+        <div style="color:${hpColor(p)};font-size:11px;text-align:right;margin-top:1px">${p.hp}/${p.stats.hp}</div>
+        <div class="xp-track"><div class="xp-fill" style="width:${xpPct()}%"></div></div>
+      </div>
     </div>
-    <img src="${spriteURL(w.dexId,true)}" class="sprite" width="90" height="90">
+    <div class="battle-ui">${ui}</div>
   </div>`;
-
-  const playerSection=`<div class="battle-player">
-    <img src="${spriteURL(p.dexId,false)}" class="sprite" width="90" height="90">
-    <div style="flex:1;margin-left:8px">
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="mon-name">${p.name}</span>
-        ${p.status?`<span class="status-badge" style="background:${statusColor(p.status)}">${statusLabel(p.status)}</span>`:''}
-      </div>
-      <div class="mon-level">Lv. ${p.lv}</div>
-      <div class="hp-row"><span class="hp-label" style="color:#333">HP</span><div class="hp-bar-wrap">${playerHPbar}</div></div>
-      <div class="hp-nums" style="color:${hpColor(p)}">${p.hp}/${p.stats.hp}</div>
-      <div class="xp-track"><div class="xp-fill" style="width:${xpPct()}%"></div></div>
-    </div>
-  </div>`;
-
-  let uiSection='';
-  if(b.phase==='reading'){
-    const msg=b.msgs[b.msgIdx]||'';
-    const more=b.msgIdx<b.msgs.length-1;
-    uiSection=`<div class="msg-box" onclick="advMsg()">
-      <div class="msg-text">${msg}</div>
-      <div class="tap-hint">${more?'▼ tap':'▼ tap to continue'}</div>
-    </div>`;
-  } else if(b.phase==='menu'){
-    uiSection=`<div class="menu-wrap">
-      <div class="menu-prompt">What will ${p.name} do?</div>
-      <div class="menu-grid">
-        <div class="menu-btn" onclick="b_phase('fight')"><span class="menu-btn-icon">⚔️</span>FIGHT</div>
-        <div class="menu-btn" onclick="b_bag()"><span class="menu-btn-icon">🎒</span>BAG<br><span style="font-size:11px;color:#aaa">◎ ${G.bag.pokeballs}</span></div>
-        <div class="menu-btn" onclick="b_phase('pokemon')"><span class="menu-btn-icon">🏆</span>POKEMON</div>
-        <div class="menu-btn" onclick="b_run()"><span class="menu-btn-icon">👟</span>RUN</div>
-      </div>
-    </div>`;
-  } else if(b.phase==='fight'){
-    const moveBtns=p.moves.map(m=>`
-      <div class="move-btn ${m.cur===0?'depleted':''}" onclick="b_move(${m.id})" style="border-color:${TYPE_COLORS[m.type]||'#555'}" ${m.cur===0?'':''}>
-        <div><div class="move-name">${m.name}</div><div class="move-meta">PP ${m.cur}/${m.pp} · ${m.cat}${m.power?` · PWR ${m.power}`:''}</div></div>
-        <span class="type-badge" style="background:${TYPE_COLORS[m.type]||'#888'};font-size:10px">${m.type}</span>
-      </div>`).join('');
-    uiSection=`<div class="move-list">${moveBtns}<button class="btn-dark" style="margin-top:4px" onclick="b_phase('menu')">← BACK</button></div>`;
-  } else if(b.phase==='pokemon'){
-    const rows=b.party.map((mon,i)=>`
-      <div class="party-row ${mon.hp===0?'fainted':''}" onclick="b_switch(${i})" style="${i===b.activeIdx?'border-color:#f8c800':''}">
-        <img src="${spriteURL(mon.dexId)}" class="sprite" width="44" height="44">
-        <div style="flex:1"><div style="font-weight:700">${mon.name} Lv${mon.lv}</div><div class="hp-nums" style="color:${hpColor(mon)}">${mon.hp}/${mon.stats.hp} HP</div></div>
-        ${i===b.activeIdx?'<span class="gold">●</span>':''}
-      </div>`).join('');
-    uiSection=`<div style="flex:1;padding:12px;overflow-y:auto"><div class="gold" style="font-weight:800;margin-bottom:8px">Switch Pokemon</div>${rows}<button class="btn-dark" onclick="b_phase('menu')">← BACK</button></div>`;
-  }
-
-  return`<div class="battle-wrap">${wildSection}${playerSection}<div class="battle-ui">${uiSection}</div></div>`;
 }
 
-// ─── PARTY ─────────────────────────────────────────────────────────────────
-function renderParty(){
-  const rows=G.party.map((p,i)=>`
-    <div class="party-row ${p.hp===0?'fainted':''}" onclick="partyDetail(${i})">
-      <img src="${spriteURL(p.dexId)}" class="sprite" width="56" height="56">
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:17px;font-weight:800">${p.name}</span>
-          <span style="color:#aaa;font-size:13px">Lv.${p.lv}</span>
-          ${p.status?`<span class="status-badge" style="background:${statusColor(p.status)}">${statusLabel(p.status)}</span>`:''}
-        </div>
-        <div style="margin:4px 0">${p.types.map(t=>typeBadge(t)).join('')}</div>
-        <div class="hp-track"><div class="hp-fill" style="width:${hpPct(p)};background:${hpColor(p)}"></div></div>
-        <div class="hp-nums" style="color:#aaa">${p.hp}/${p.stats.hp} HP</div>
-      </div>
-    </div>`).join('');
-
+function renderShop(){
+  const maxLv=G.party.length?Math.max(...G.party.map(p=>p.lv)):1;
+  const items=[
+    {icon:'◎',name:'Poke Ball',desc:'Catch wild Pokemon',cost:200,key:'pokeballs'},
+    {icon:'💊',name:'Potion',desc:'Restore 30 HP in battle',cost:300,key:'potions'},
+  ];
   return`<div class="screen" style="gap:0">
     <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #333;margin-bottom:12px">
       <button class="btn-dark" style="width:auto;padding:8px 16px" onclick="G.screen='overworld';render()">← Back</button>
-      <span class="gold" style="font-size:18px;font-weight:800">Your Party</span>
-      <button class="btn-dark" style="width:auto;padding:8px 16px;color:#44dd44;border-color:#44dd44" onclick="go('healAll')">Heal All</button>
+      <span class="gold" style="font-size:18px;font-weight:800">🏪 Shop</span>
+      <span style="color:#f8c820;font-weight:700;font-size:15px">💰${G.bag.gold||0}g</span>
     </div>
-    ${rows||'<div style="color:#555;text-align:center;margin-top:40px">No Pokemon in party</div>'}
+    ${items.map(it=>`<div class="shop-item"><div><div style="font-size:16px;font-weight:700">${it.icon} ${it.name}</div><div style="color:#aaa;font-size:12px;margin-top:2px">${it.desc}</div><div style="color:#aaa;font-size:11px;margin-top:1px">In bag: ${G.bag[it.key]||0}</div></div><button class="${(G.bag.gold||0)>=it.cost?'btn-gold':'btn-disabled'}" style="width:auto;padding:10px 16px" onclick="buyItem('${it.key}',${it.cost})" ${(G.bag.gold||0)<it.cost?'disabled':''}>${it.cost}g</button></div>`).join('')}
+    <div style="margin-top:20px">
+      <div class="gold" style="font-size:13px;font-weight:800;margin-bottom:8px">SELL — Win battles to earn gold!</div>
+      <div style="color:#555;font-size:12px">Each wild Pokemon gives gold = its level × 12g</div>
+    </div>
   </div>`;
 }
 
-// ─── MODAL ─────────────────────────────────────────────────────────────────
-function showModal(){
-  const old=document.querySelector('.modal-overlay');
-  if(old)old.remove();
-  if(!G.modal)return;
-  const el=document.createElement('div');
-  el.className='modal-overlay';
-  el.innerHTML=`<div class="modal-box">${G.modal.content}</div>`;
-  document.getElementById('app').appendChild(el);
+function renderParty(){
+  return`<div class="screen" style="gap:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #333;margin-bottom:12px">
+      <button class="btn-dark" style="width:auto;padding:8px 16px" onclick="G.screen='overworld';render()">← Back</button>
+      <span class="gold" style="font-size:18px;font-weight:800">🏆 Party</span>
+      <button class="btn-dark" style="width:auto;padding:8px 16px;color:#44dd44;border-color:#44dd44" onclick="healAll();render()">Heal</button>
+    </div>
+    ${G.party.map((p,i)=>`<div class="party-row ${p.hp===0?'fainted':''}" onclick="partyDetail(${i})">
+      <img src="${spr(p.dexId)}" width="56" height="56" style="image-rendering:pixelated">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:17px;font-weight:800">${p.name}</span><span style="color:#aaa;font-size:13px">Lv.${p.lv}</span>${sbadge(p.status)}</div>
+        <div style="margin:4px 0">${p.types.map(t=>tbadge(t)).join('')}</div>
+        <div class="hp-track"><div class="hp-fill" style="width:${hpPct(p)};background:${hpColor(p)}"></div></div>
+        <div style="color:#aaa;font-size:11px;margin-top:2px">${p.hp}/${p.stats.hp} HP</div>
+      </div>
+    </div>`).join('')||'<div style="color:#555;text-align:center;margin-top:40px">Party is empty!</div>'}
+  </div>`;
 }
 
-function closeModal(){G.modal=null;render();}
+// ══════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════
+function navGo(action) {
+  switch(action){
+    case 'new': G.playerName='';G.party=[];G.bag={pokeballs:5,potions:2,gold:500};G.area='Route 1';_starterChosen=null;OW.player={tx:7,ty:6,px:0,py:0,dir:'down',moving:false,stepF:0,walkCycle:0,targetTX:7,targetTY:6};G.screen='name';render();break;
+    case 'continue': if(loadGame()){G.screen='overworld';render();}break;
+    case 'nameNext':{const n=document.getElementById('nameIn');const v=(n&&n.value||G.playerName).trim();if(!v){alert('Please enter your name!');return;}G.playerName=v;G.screen='starter';_starterChosen=null;render();break;}
+    case 'startGame': if(!_starterChosen)return;G.party=[createMon(_starterChosen,5)];saveGame();G.screen='overworld';render();break;
+  }
+}
 
-function openAreaPicker(){
-  const maxLv=G.party.length?Math.max(...G.party.map(p=>p.lv)):1;
-  const opts=Object.entries(AREAS).map(([name,a])=>{
-    const locked=maxLv<a.unlock;
-    return`<div class="area-opt ${locked?'locked':''}" onclick="${locked?'':'selectArea(\''+name+'\')'}">
-      <span style="color:${locked?'#555':'#fff'};font-size:15px;font-weight:600">${name}</span>
-      <span style="color:${locked?'#444':'#aaa'};font-size:12px">${locked?'🔒 Req. Lv '+a.unlock:'Lv '+a.min+'–'+a.max}</span>
-    </div>`;
-  }).join('');
-  G.modal={content:`<div class="gold" style="font-weight:800;font-size:18px;margin-bottom:12px">Choose Area</div>${opts}<button class="btn-dark" style="margin-top:12px" onclick="closeModal()">Close</button>`};
-  render();
+function chooseStarter(id){_starterChosen=id;render();}
+
+function buyItem(key,cost){
+  if((G.bag.gold||0)<cost)return;
+  G.bag.gold-=cost;
+  G.bag[key]=(G.bag[key]||0)+1;
+  SFX.buy(); saveGame(); render();
 }
 
 function partyDetail(i){
   const p=G.party[i];
-  const statBar=(label,val)=>{const pct=Math.min(100,Math.round(val/250*100));const c=pct>66?'#44dd44':pct>33?'#f8c800':'#f83800';return`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:#aaa;font-size:11px;width:44px">${label}</span><div style="flex:1;height:6px;background:#333;border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${c};border-radius:3px"></div></div><span style="color:#fff;font-size:11px;width:26px;text-align:right">${val}</span></div>`;};
   const xpPct=()=>{const base=xpForLv(p.lv),next=p.xpNext,cur=p.xp;return next===base?100:Math.max(0,Math.round(((cur-base)/(next-base))*100));};
-  const moveRows=p.moves.map(m=>`<div style="background:#141428;border-radius:10px;padding:10px;margin-bottom:6px;display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:${TYPE_COLORS[m.type]||'#888'}"></div><span style="flex:1;font-weight:700;font-size:14px">${m.name}</span><span style="color:#888;font-size:11px">${m.cat}${m.power?` · ${m.power}pwrr`:' · Status'}</span><span style="color:${m.cur===0?'#f83800':'#aaa'};font-size:12px;font-weight:700">${m.cur}/${m.pp}</span></div>`).join('');
-  G.modal={content:`
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <img src="${spriteURL(p.dexId)}" class="sprite" width="80" height="80">
-      <div><div style="font-size:22px;font-weight:900">${p.name}</div><div style="color:#aaa;font-size:14px">Level ${p.lv}</div><div style="margin-top:4px">${p.types.map(t=>typeBadge(t)).join('')}</div></div>
-    </div>
-    <div class="gold" style="font-size:12px;font-weight:800;letter-spacing:1px;margin-bottom:6px">HP</div>
-    <div class="hp-track"><div class="hp-fill" style="width:${hpPct(p)};background:${hpColor(p)}"></div></div>
-    <div style="color:#aaa;font-size:12px;text-align:right;margin-top:2px">${p.hp}/${p.stats.hp}</div>
-    <div style="margin-top:4px;color:#aaa;font-size:11px">XP to next level: ${xpPct()}%</div>
-    <div class="xp-track"><div class="xp-fill" style="width:${xpPct()}%"></div></div>
-    <div class="gold" style="font-size:12px;font-weight:800;letter-spacing:1px;margin:12px 0 6px">STATS</div>
-    ${statBar('Atk',p.stats.atk)}${statBar('Def',p.stats.def)}${statBar('Sp.Atk',p.stats.spa)}${statBar('Sp.Def',p.stats.spd)}${statBar('Speed',p.stats.spe)}
-    <div class="gold" style="font-size:12px;font-weight:800;letter-spacing:1px;margin:12px 0 6px">MOVES</div>
-    ${moveRows}
-    <button class="btn-dark" style="margin-top:8px" onclick="closeModal()">Close</button>
-  `};
+  const sb=(lbl,val)=>{const pct=Math.min(100,Math.round(val/250*100));const c=pct>66?'#44dd44':pct>33?'#f8c800':'#f83800';return`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:#aaa;font-size:11px;width:46px">${lbl}</span><div style="flex:1;height:6px;background:#333;border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${c};border-radius:3px"></div></div><span style="color:#fff;font-size:11px;width:28px;text-align:right">${val}</span></div>`;};
+  G.modal={content:`<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><img src="${spr(p.dexId)}" width="80" height="80" style="image-rendering:pixelated"><div><div style="font-size:22px;font-weight:900">${p.name}</div><div style="color:#aaa;font-size:14px">Level ${p.lv}</div><div style="margin-top:4px">${p.types.map(t=>tbadge(t)).join('')}</div></div></div><div class="gold" style="font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:6px">HP</div><div class="hp-track"><div class="hp-fill" style="width:${hpPct(p)};background:${hpColor(p)}"></div></div><div style="color:#aaa;font-size:11px;text-align:right;margin:2px 0 4px">XP to next: ${xpPct()}%</div><div class="xp-track"><div class="xp-fill" style="width:${xpPct()}%"></div></div><div class="gold" style="font-size:11px;font-weight:800;letter-spacing:1px;margin:12px 0 6px">STATS</div>${sb('Atk',p.stats.atk)}${sb('Def',p.stats.def)}${sb('Sp.Atk',p.stats.spa)}${sb('Sp.Def',p.stats.spd)}${sb('Speed',p.stats.spe)}<div class="gold" style="font-size:11px;font-weight:800;letter-spacing:1px;margin:12px 0 6px">MOVES</div>${p.moves.map(m=>`<div style="background:#141428;border-radius:10px;padding:9px;margin-bottom:5px;display:flex;align-items:center;gap:8px"><div style="width:9px;height:9px;border-radius:50%;background:${TC_COLOR[m.type]||'#888'}"></div><span style="flex:1;font-weight:700;font-size:13px">${m.name}</span><span style="color:#888;font-size:10px">${m.cat}${m.power?` · ${m.power}`:''}</span><span style="color:${m.cur===0?'#f83800':'#aaa'};font-size:11px;font-weight:700">${m.cur}/${m.pp}</span></div>`).join('')}<button class="btn-dark" style="margin-top:10px" onclick="closeModal()">Close</button>`};
   render();
 }
 
-// ─── NAVIGATION / ACTIONS ──────────────────────────────────────────────────
-function go(action){
-  switch(action){
-    case 'new':
-      G.playerName='';G.party=[];G.bag={pokeballs:5};G.area='Route 1';_chosen=null;
-      G.screen='name';render();break;
-    case 'continue':
-      if(load()){G.screen='overworld';render();}break;
-    case 'nameNext':{
-      const n=document.getElementById('nameInput');
-      const v=(n&&n.value||G.playerName).trim();
-      if(!v){alert('Please enter your name!');return;}
-      G.playerName=v;G.screen='starter';_chosen=null;render();break;}
-    case 'startGame':
-      if(!_chosen)return;
-      G.party=[createMon(_chosen,5)];save();G.screen='overworld';render();break;
-    case 'explore':{
-      if(!G.party.some(p=>p.hp>0)){alert('All your Pokemon have fainted! Use Rest to heal them first.');return;}
-      const w=randomEnc(G.area);
-      const pClone=G.party.map(p=>JSON.parse(JSON.stringify(p)));
-      const alive=pClone.findIndex(p=>p.hp>0);
-      G.battle={wild:w,party:pClone,activeIdx:alive>=0?alive:0,phase:'reading',msgs:[`A wild ${w.name} appeared!`],msgIdx:0,pendingPhase:'menu',escAttempts:0};
-      G.screen='battle';render();break;}
-    case 'rest':
-      if(confirm('Heal all Pokemon to full HP?')){healAll();save();render();}break;
-    case 'save': save();alert('Game saved!');break;
-    case 'healAll': healAll();save();render();break;
-  }
-}
+// ══════════════════════════════════════════════════════
+//  BATTLE ACTIONS
+// ══════════════════════════════════════════════════════
+function bPhase(ph){if(G.battle){G.battle.phase=ph;render();}}
 
-function chooseStarter(id){_chosen=id;render();}
-function selectArea(name){G.area=name;G.modal=null;render();}
+function bPushMsgs(msgs,next){const b=G.battle;b.msgs=msgs;b.msgIdx=0;b.phase='reading';b.pendingPhase=next;render();}
 
-// ─── BATTLE ACTIONS ────────────────────────────────────────────────────────
-function b_phase(ph){if(G.battle){G.battle.phase=ph;render();}}
-
-function advMsg(){
-  const b=G.battle;
-  if(!b)return;
+function bAdvMsg(){
+  const b=G.battle; if(!b)return;
   if(b.msgIdx<b.msgs.length-1){b.msgIdx++;render();}
-  else{
-    if(b.pendingPhase==='end'){endBattle();}
-    else{b.phase=b.pendingPhase;b.msgs=[];b.msgIdx=0;render();}
-  }
+  else{ if(b.pendingPhase==='end')bEnd(); else{b.phase=b.pendingPhase;b.msgs=[];b.msgIdx=0;render();} }
 }
 
-function pushMsgs(msgs,next){
+function bEnd(){
   const b=G.battle;
-  b.msgs=msgs;b.msgIdx=0;b.phase='reading';b.pendingPhase=next;render();
-}
-
-function endBattle(){
-  const b=G.battle;
-  // Sync party back
   if(b.endResult==='caught'){
-    const caught=JSON.parse(JSON.stringify(b.wild));
-    caught.hp=Math.max(1,Math.floor(b.wild.stats.hp*.3));
-    caught.status=null;
-    if(G.party.length<6)G.party.push(caught);
-    else G.party=b.party.map(p=>JSON.parse(JSON.stringify(p)));
+    const caught=deepClone(b.wild); caught.hp=Math.max(1,Math.floor(b.wild.stats.hp*.3)); caught.status=null;
+    if(G.party.length<6) G.party.push(caught);
+    else G.party=b.party.map(deepClone);
   } else if(b.endResult==='lost'){
     G.party=b.party.map(p=>({...p,hp:Math.max(1,Math.floor(p.stats.hp*.3)),status:null}));
   } else {
-    G.party=b.party.map(p=>JSON.parse(JSON.stringify(p)));
+    G.party=b.party.map(deepClone);
   }
-  save();
-  G.battle=null;
-  G.screen='overworld';render();
+  saveGame(); G.battle=null; G.screen='overworld';
+  playMusic('overworld');
+  render();
 }
 
-function applyStatStage(mon,stat,stages){
-  const cur=mon.stg[stat]||0;
-  mon.stg[stat]=Math.max(-6,Math.min(6,cur+stages));
-  return mon;
-}
+function stgApply(mon,stat,stages){mon.stg[stat]=Math.max(-6,Math.min(6,(mon.stg[stat]||0)+stages));}
 
-function eotStatus(mon){
+function eotDmg(mon){
   const msgs=[];
-  if(mon.status==='burn'||mon.status==='poison'){
-    const d=Math.max(1,Math.floor(mon.stats.hp/8));
-    mon.hp=Math.max(0,mon.hp-d);
-    msgs.push(`${mon.name} is hurt by ${mon.status==='burn'?'its burn':'poison'}! (${d} dmg)`);
-  }
+  if(mon.status==='burn'||mon.status==='poison'){const d=Math.max(1,Math.floor(mon.stats.hp/8));mon.hp=Math.max(0,mon.hp-d);msgs.push(`${mon.name} is hurt by ${mon.status==='burn'?'burn':'poison'}! (${d})`);}
   if(mon.status==='sleep'){mon.stTurns=(mon.stTurns||0)+1;if(mon.stTurns>=3){mon.status=null;mon.stTurns=0;msgs.push(`${mon.name} woke up!`);}}
-  if(mon.status==='freeze'){if(Math.random()<.2){mon.status=null;msgs.push(`${mon.name} thawed out!`);}}
+  if(mon.status==='freeze'&&Math.random()<.2){mon.status=null;msgs.push(`${mon.name} thawed out!`);}
   return msgs;
 }
 
-function pickWildMove(mon){
-  const usable=mon.moves.filter(m=>m.cur>0);
-  const pool=usable.length?usable:mon.moves;
-  return pool[Math.floor(Math.random()*pool.length)];
-}
-
-function executeMove(attacker,defender,move,msgs){
-  // Status checks
-  if(attacker.status==='paralysis'&&Math.random()<.25){msgs.push(`${attacker.name} is paralyzed and can't move!`);return false;}
-  if(attacker.status==='sleep'){msgs.push(`${attacker.name} is fast asleep!`);return false;}
-  if(attacker.status==='freeze'){msgs.push(`${attacker.name} is frozen solid!`);return false;}
-
-  msgs.push(`${attacker.name} used ${move.name}!`);
-  // Deduct PP
-  const mi=attacker.moves.findIndex(m=>m.id===move.id);
-  if(mi>=0)attacker.moves[mi].cur=Math.max(0,move.cur-1);
-
+function execMove(atk,def,move,msgs){
+  if(atk.status==='paralysis'&&Math.random()<.25){msgs.push(`${atk.name} is paralyzed and can't move!`);return;}
+  if(atk.status==='sleep'){msgs.push(`${atk.name} is fast asleep!`);return;}
+  if(atk.status==='freeze'){msgs.push(`${atk.name} is frozen solid!`);return;}
+  msgs.push(`${atk.name} used ${move.name}!`);
+  const mi=atk.moves.findIndex(m=>m.id===move.id); if(mi>=0)atk.moves[mi].cur=Math.max(0,move.cur-1);
   if(move.cat==='Status'){
-    const eff=move.eff;
-    if(!eff){msgs.push('But nothing happened!');return true;}
-    if(eff.k==='stat'){
-      applyStatStage(eff.tgt==='foe'?defender:attacker,eff.stat,eff.stg);
-      const target=eff.tgt==='foe'?defender:attacker;
-      msgs.push(`${target.name}'s ${eff.stat.toUpperCase()} ${eff.stg>0?'rose':'fell'}!`);
-    } else if(eff.k==='status'){
-      if(!defender.status){defender.status=eff.status;msgs.push(`${defender.name} ${eff.status==='sleep'?'fell asleep':'was '+eff.status+'ed'}!`);}
-      else msgs.push("But it had no effect!");
-    }
-    return true;
+    const eff=move.eff; if(!eff){msgs.push('But nothing happened!');return;}
+    if(eff.k==='stat'){const t=eff.tgt==='foe'?def:atk;stgApply(t,eff.stat,eff.stg);msgs.push(`${t.name}'s ${eff.stat.toUpperCase()} ${eff.stg>0?'rose':'fell'}!`);}
+    else if(eff.k==='status'){if(!def.status){def.status=eff.status;msgs.push(`${def.name} fell ${eff.status==='sleep'?'asleep':'into '+eff.status}!`);}else msgs.push('But it had no effect!');}
+    return;
   }
-
-  // Accuracy
-  if(!hitCheck(move,attacker,defender)){msgs.push(`${defender.name} avoided the attack!`);return true;}
-
-  const r=calcDmg(attacker,defender,move);
-  if(r.tm===0){msgs.push('It had no effect!');return true;}
+  if(!hitCheck(move,atk,def)){msgs.push(`${def.name} avoided the attack!`);return;}
+  const r=calcDmg(atk,def,move);
+  if(r.tm===0){msgs.push('It had no effect!');return;}
   if(r.crit)msgs.push('A critical hit!');
   if(r.tt)msgs.push(r.tt);
-  defender.hp=Math.max(0,defender.hp-r.dmg);
-  msgs.push(`${defender.name} took ${r.dmg} damage!`);
-  if(r.drain){attacker.hp=Math.min(attacker.stats.hp,attacker.hp+r.drain);msgs.push(`${attacker.name} restored ${r.drain} HP!`);}
-
+  def.hp=Math.max(0,def.hp-r.dmg); msgs.push(`${def.name} took ${r.dmg} damage!`);
+  if(r.drain){atk.hp=Math.min(atk.stats.hp,atk.hp+r.drain);msgs.push(`${atk.name} restored ${r.drain} HP!`);}
   const eff=move.eff;
-  if(eff&&defender.hp>0){
-    const roll=eff.ch?Math.random()*100<eff.ch:true;
-    if(roll){
-      if(eff.k==='status'&&!defender.status){defender.status=eff.status;msgs.push(`${defender.name} was ${eff.status}!`);}
-      else if(eff.k==='stat'){applyStatStage(defender,eff.stat,eff.stg);msgs.push(`${defender.name}'s ${eff.stat.toUpperCase()} fell!`);}
-    }
-  }
-  return true;
+  if(eff&&def.hp>0){const roll=eff.ch?Math.random()*100<eff.ch:true;if(roll){if(eff.k==='status'&&!def.status){def.status=eff.status;msgs.push(`${def.name} was ${eff.status}!`);}else if(eff.k==='stat'){stgApply(def,eff.stat,eff.stg);msgs.push(`${def.name}'s ${eff.stat.toUpperCase()} fell!`);}}}
 }
 
-function b_move(moveId){
-  const b=G.battle;
-  if(!b||b.phase!=='fight')return;
-  const p=b.party[b.activeIdx];
-  const move=p.moves.find(m=>m.id===moveId);
+function pickWildMove(mon){const u=mon.moves.filter(m=>m.cur>0);return(u.length?u:mon.moves)[Math.floor(Math.random()*(u.length||mon.moves.length))];}
+
+function bMove(moveId){
+  const b=G.battle; if(!b||b.phase!=='fight')return;
+  const p=b.party[b.activeIdx], move=p.moves.find(m=>m.id===moveId);
   if(!move||move.cur===0)return;
-
-  const msgs=[];
-  const w=b.wild;
-
-  executeMove(p,w,move,msgs);
-
+  SFX.select();
+  const msgs=[], w=b.wild;
+  execMove(p,w,move,msgs);
+  if(move.cat!=='Status') SFX.hit();
   if(w.hp<=0){
     msgs.push(`${w.name} fainted!`);
     const xpGained=Math.max(1,Math.floor((w.xpY*w.lv)/7));
+    const gold=Math.floor(w.lv*12);
     msgs.push(`${p.name} gained ${xpGained} XP!`);
-    p.xp=(p.xp||0)+xpGained;
+    msgs.push(`You found ${gold}g!`);
+    p.xp=(p.xp||0)+xpGained; addGold(gold);
     while(p.xp>=p.xpNext&&p.lv<100){
-      p.lv++;const base=POKEMON_DB[p.dexId].bs;
-      const ns={hp:calcStat(base.hp,p.lv,true),atk:calcStat(base.atk,p.lv,false),def:calcStat(base.def,p.lv,false),spa:calcStat(base.spa,p.lv,false),spd:calcStat(base.spd,p.lv,false),spe:calcStat(base.spe,p.lv,false)};
-      p.hp=Math.min(ns.hp,p.hp+(ns.hp-p.stats.hp));p.stats=ns;p.xpNext=xpForLv(p.lv+1);
-      msgs.push(`${p.name} grew to level ${p.lv}!`);
+      p.lv++; const db=PDB[p.dexId].bs;
+      const ns={hp:calcStat(db.hp,p.lv,true),atk:calcStat(db.atk,p.lv,false),def:calcStat(db.def,p.lv,false),spa:calcStat(db.spa,p.lv,false),spd:calcStat(db.spd,p.lv,false),spe:calcStat(db.spe,p.lv,false)};
+      p.hp=Math.min(ns.hp,p.hp+(ns.hp-p.stats.hp)); p.stats=ns; p.xpNext=xpForLv(p.lv+1);
+      msgs.push(`${p.name} grew to level ${p.lv}!`); SFX.levelUp();
     }
-    b.endResult='win';pushMsgs(msgs,'end');return;
+    b.endResult='win'; SFX.victory(); bPushMsgs(msgs,'end'); return;
   }
-
   // Wild turn
-  const wMove=pickWildMove(w);
-  executeMove(w,p,wMove,msgs);
-
-  // EOT
-  msgs.push(...eotStatus(p));
-  msgs.push(...eotStatus(w));
-
+  const wm=pickWildMove(w); execMove(w,p,wm,msgs);
+  if(wm.cat!=='Status') SFX.hit();
+  msgs.push(...eotDmg(p)); msgs.push(...eotDmg(w));
   if(p.hp<=0){
     msgs.push(`${p.name} fainted!`);
     const next=b.party.findIndex((m,i)=>i!==b.activeIdx&&m.hp>0);
-    if(next>=0){msgs.push(`Go, ${b.party[next].name}!`);b.activeIdx=next;pushMsgs(msgs,'menu');}
-    else{msgs.push("You have no more Pokemon...");msgs.push("You blacked out!");b.endResult='lost';pushMsgs(msgs,'end');}
+    if(next>=0){msgs.push(`Go, ${b.party[next].name}!`);b.activeIdx=next;bPushMsgs(msgs,'menu');}
+    else{msgs.push('You have no more Pokemon...');msgs.push('You blacked out!');b.endResult='lost';bPushMsgs(msgs,'end');}
     return;
   }
-  if(w.hp<=0){msgs.push(`${w.name} fainted!`);b.endResult='win';pushMsgs(msgs,'end');return;}
-
-  pushMsgs(msgs,'menu');
+  if(w.hp<=0){msgs.push(`${w.name} fainted!`);b.endResult='win';bPushMsgs(msgs,'end');return;}
+  bPushMsgs(msgs,'menu');
 }
 
-function b_bag(){
+function bBag(){bPhase('bag_items');}
+
+function bThrowBall(){
   const b=G.battle;
-  if(G.bag.pokeballs<=0){pushMsgs(["You're out of Poke Balls!"],'menu');return;}
+  if(G.bag.pokeballs<=0){bPushMsgs(["You're out of Poke Balls!"],'menu');return;}
   G.bag.pokeballs--;
   const caught=tryCatch(b.wild);
-  if(caught){b.endResult='caught';pushMsgs([`You threw a Poke Ball...`,'...','...','Gotcha! '+b.wild.name+' was caught!'],'end');}
-  else{pushMsgs([`You threw a Poke Ball...`,b.wild.name+' broke free!'],'menu');}
+  if(caught){SFX.catch_();b.endResult='caught';bPushMsgs([`You threw a Poke Ball!`,'...','...','Gotcha! '+b.wild.name+' was caught!'],'end');}
+  else bPushMsgs([`You threw a Poke Ball!`,b.wild.name+' broke free!'],'menu');
 }
 
-function b_run(){
+function bUsePotion(){
   const b=G.battle;
-  b.escAttempts=(b.escAttempts||0)+1;
+  if(!G.bag.potions||G.bag.potions<=0){bPushMsgs(['No Potions left!'],'menu');return;}
+  const p=b.party[b.activeIdx];
+  if(p.hp<=0){bPushMsgs([`${p.name} has fainted!`],'menu');return;}
+  G.bag.potions--;
+  const healed=Math.min(30,p.stats.hp-p.hp);
+  p.hp=Math.min(p.stats.hp,p.hp+30);
+  SFX.heal();
+  bPushMsgs([`You used a Potion!`,`${p.name} recovered ${healed} HP!`],'menu');
+}
+
+function bRun(){
+  const b=G.battle; b.escAttempts=(b.escAttempts||0)+1;
   const p=b.party[b.activeIdx];
   const fled=p.stats.spe>=b.wild.stats.spe||Math.random()*256<Math.floor((p.stats.spe*128)/b.wild.stats.spe)+30*b.escAttempts;
-  if(fled){b.endResult='run';pushMsgs(['Got away safely!'],'end');}
-  else{pushMsgs(["Can't escape!"],'menu');}
+  if(fled){b.endResult='run';SFX.select();bPushMsgs(['Got away safely!'],'end');}
+  else bPushMsgs(["Can't escape!"],'menu');
 }
 
-function b_switch(idx){
+function bSwitch(idx){
   const b=G.battle;
-  if(idx===b.activeIdx)return;
-  if(b.party[idx].hp<=0)return;
-  b.activeIdx=idx;b.phase='menu';render();
+  if(idx===b.activeIdx||b.party[idx].hp<=0)return;
+  b.activeIdx=idx;bPhase('menu');
 }
 
-// ─── EVENT BINDING ─────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════════════════════
+function showModal(){
+  const old=document.querySelector('.modal-overlay'); if(old)old.remove();
+  if(!G.modal)return;
+  const el=document.createElement('div'); el.className='modal-overlay';
+  el.innerHTML=`<div class="modal-box">${G.modal.content}</div>`;
+  document.getElementById('app').appendChild(el);
+}
+function closeModal(){G.modal=null;render();}
+
 function bindEvents(){
-  // Handle enter key on name input
-  const ni=document.getElementById('nameInput');
-  if(ni){ni.focus();ni.addEventListener('keydown',e=>{if(e.key==='Enter')go('nameNext');});}
+  const ni=document.getElementById('nameIn');
+  if(ni){ni.focus();ni.addEventListener('keydown',e=>{if(e.key==='Enter')navGo('nameNext');});}
 }
 
-// ─── BOOT ──────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════════
 render();
 </script>
 </body>
