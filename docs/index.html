@@ -235,6 +235,17 @@ const TC_COLOR={Normal:'#a8a878',Fire:'#e2621b',Water:'#4a90d9',Grass:'#5db85a',
 const MOVES={1:{id:1,name:'Tackle',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},2:{id:2,name:'Growl',type:'Normal',cat:'Status',power:0,acc:100,pp:40,eff:{k:'stat',stat:'atk',stg:-1,tgt:'foe'}},3:{id:3,name:'Vine Whip',type:'Grass',cat:'Physical',power:45,acc:100,pp:25},4:{id:4,name:'Leech Seed',type:'Grass',cat:'Status',power:0,acc:90,pp:10,eff:{k:'status',status:'leech'}},5:{id:5,name:'Razor Leaf',type:'Grass',cat:'Physical',power:55,acc:95,pp:25,hc:true},6:{id:6,name:'Sleep Powder',type:'Grass',cat:'Status',power:0,acc:75,pp:15,eff:{k:'status',status:'sleep'}},7:{id:7,name:'Scratch',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},8:{id:8,name:'Ember',type:'Fire',cat:'Special',power:40,acc:100,pp:25,eff:{k:'status',status:'burn',ch:10}},9:{id:9,name:'Smokescreen',type:'Normal',cat:'Status',power:0,acc:100,pp:20,eff:{k:'stat',stat:'acc',stg:-1,tgt:'foe'}},10:{id:10,name:'Flamethrower',type:'Fire',cat:'Special',power:90,acc:100,pp:15,eff:{k:'status',status:'burn',ch:10}},12:{id:12,name:'Tail Whip',type:'Normal',cat:'Status',power:0,acc:100,pp:30,eff:{k:'stat',stat:'def',stg:-1,tgt:'foe'}},13:{id:13,name:'Bubble',type:'Water',cat:'Special',power:40,acc:100,pp:30},14:{id:14,name:'Water Gun',type:'Water',cat:'Special',power:40,acc:100,pp:25},15:{id:15,name:'Surf',type:'Water',cat:'Special',power:90,acc:100,pp:15},17:{id:17,name:'Body Slam',type:'Normal',cat:'Physical',power:85,acc:100,pp:15,eff:{k:'status',status:'paralysis',ch:30}},18:{id:18,name:'Quick Attack',type:'Normal',cat:'Physical',power:40,acc:100,pp:30},19:{id:19,name:'ThunderShock',type:'Electric',cat:'Special',power:40,acc:100,pp:30,eff:{k:'status',status:'paralysis',ch:10}},20:{id:20,name:'Thunderbolt',type:'Electric',cat:'Special',power:90,acc:100,pp:15,eff:{k:'status',status:'paralysis',ch:10}},22:{id:22,name:'Ice Beam',type:'Ice',cat:'Special',power:90,acc:100,pp:10,eff:{k:'status',status:'freeze',ch:10}},24:{id:24,name:'Psychic',type:'Psychic',cat:'Special',power:90,acc:100,pp:10},25:{id:25,name:'Confusion',type:'Psychic',cat:'Special',power:50,acc:100,pp:25},26:{id:26,name:'Poison Sting',type:'Poison',cat:'Physical',power:15,acc:100,pp:35,eff:{k:'status',status:'poison',ch:30}},27:{id:27,name:'Sludge',type:'Poison',cat:'Special',power:65,acc:100,pp:20,eff:{k:'status',status:'poison',ch:30}},28:{id:28,name:'Earthquake',type:'Ground',cat:'Physical',power:100,acc:100,pp:10},29:{id:29,name:'String Shot',type:'Bug',cat:'Status',power:0,acc:95,pp:40,eff:{k:'stat',stat:'spd',stg:-2,tgt:'foe'}},30:{id:30,name:'Wing Attack',type:'Flying',cat:'Physical',power:60,acc:100,pp:35},31:{id:31,name:'Gust',type:'Flying',cat:'Special',power:40,acc:100,pp:35},32:{id:32,name:'Karate Chop',type:'Fighting',cat:'Physical',power:50,acc:100,pp:25,hc:true},33:{id:33,name:'Lick',type:'Ghost',cat:'Physical',power:30,acc:100,pp:30,eff:{k:'status',status:'paralysis',ch:30}},34:{id:34,name:'Rock Throw',type:'Rock',cat:'Physical',power:50,acc:90,pp:15},35:{id:35,name:'Peck',type:'Flying',cat:'Physical',power:35,acc:100,pp:35},36:{id:36,name:'Bite',type:'Dark',cat:'Physical',power:60,acc:100,pp:25},37:{id:37,name:'Leer',type:'Normal',cat:'Status',power:0,acc:100,pp:30,eff:{k:'stat',stat:'def',stg:-1,tgt:'foe'}},40:{id:40,name:'Splash',type:'Normal',cat:'Status',power:0,acc:100,pp:40},41:{id:41,name:'Acid',type:'Poison',cat:'Special',power:40,acc:100,pp:30},42:{id:42,name:'Headbutt',type:'Normal',cat:'Physical',power:70,acc:100,pp:15},43:{id:43,name:'Low Kick',type:'Fighting',cat:'Physical',power:65,acc:100,pp:20},44:{id:44,name:'Wrap',type:'Normal',cat:'Physical',power:15,acc:85,pp:20},45:{id:45,name:'Absorb',type:'Grass',cat:'Special',power:20,acc:100,pp:25,drain:true},46:{id:46,name:'Sing',type:'Normal',cat:'Status',power:0,acc:55,pp:15,eff:{k:'status',status:'sleep'}},47:{id:47,name:'Supersonic',type:'Normal',cat:'Status',power:0,acc:55,pp:20,eff:{k:'status',status:'confusion'}},48:{id:48,name:'Screech',type:'Normal',cat:'Status',power:0,acc:85,pp:40,eff:{k:'stat',stat:'def',stg:-2,tgt:'foe'}},49:{id:49,name:'Sand Attack',type:'Ground',cat:'Status',power:0,acc:100,pp:15,eff:{k:'stat',stat:'acc',stg:-1,tgt:'foe'}},50:{id:50,name:'Bone Club',type:'Ground',cat:'Physical',power:65,acc:85,pp:20},51:{id:51,name:'Pound',type:'Normal',cat:'Physical',power:40,acc:100,pp:35},52:{id:52,name:'Nuzzle',type:'Electric',cat:'Physical',power:20,acc:100,pp:20,eff:{k:'status',status:'paralysis',ch:100}},53:{id:53,name:'Dig',type:'Ground',cat:'Physical',power:80,acc:100,pp:10}};
 
 const PDB={1:{id:1,name:'Bulbasaur',types:['Grass','Poison'],bs:{hp:45,atk:49,def:45,spa:65,spd:65,spe:45},moves:[1,2,3,4],cr:45,xp:64},4:{id:4,name:'Charmander',types:['Fire'],bs:{hp:39,atk:52,def:43,spa:60,spd:50,spe:65},moves:[7,2,8,9],cr:45,xp:62},7:{id:7,name:'Squirtle',types:['Water'],bs:{hp:44,atk:48,def:65,spa:50,spd:64,spe:43},moves:[1,12,13,14],cr:45,xp:63},10:{id:10,name:'Caterpie',types:['Bug'],bs:{hp:45,atk:30,def:35,spa:20,spd:20,spe:45},moves:[1,29],cr:255,xp:39},13:{id:13,name:'Weedle',types:['Bug','Poison'],bs:{hp:40,atk:35,def:30,spa:20,spd:20,spe:50},moves:[26,29],cr:255,xp:39},16:{id:16,name:'Pidgey',types:['Normal','Flying'],bs:{hp:40,atk:45,def:40,spa:35,spd:35,spe:56},moves:[1,31,35],cr:255,xp:50},19:{id:19,name:'Rattata',types:['Normal'],bs:{hp:30,atk:56,def:35,spa:25,spd:35,spe:72},moves:[1,12,36],cr:255,xp:51},23:{id:23,name:'Ekans',types:['Poison'],bs:{hp:35,atk:60,def:44,spa:40,spd:54,spe:55},moves:[44,37,26,27],cr:255,xp:58},25:{id:25,name:'Pikachu',types:['Electric'],bs:{hp:35,atk:55,def:40,spa:50,spd:50,spe:90},moves:[52,2,18,19],cr:190,xp:112},35:{id:35,name:'Clefairy',types:['Normal'],bs:{hp:70,atk:45,def:48,spa:60,spd:65,spe:35},moves:[51,2,1,17],cr:150,xp:113},37:{id:37,name:'Vulpix',types:['Fire'],bs:{hp:38,atk:41,def:40,spa:50,spd:65,spe:65},moves:[8,12,18,10],cr:190,xp:60},39:{id:39,name:'Jigglypuff',types:['Normal'],bs:{hp:115,atk:45,def:20,spa:45,spd:25,spe:20},moves:[46,51,1],cr:170,xp:76},41:{id:41,name:'Zubat',types:['Poison','Flying'],bs:{hp:40,atk:45,def:35,spa:30,spd:40,spe:55},moves:[33,47],cr:255,xp:54},43:{id:43,name:'Oddish',types:['Grass','Poison'],bs:{hp:45,atk:50,def:55,spa:75,spd:65,spe:30},moves:[51,41,6],cr:255,xp:64},46:{id:46,name:'Paras',types:['Bug','Grass'],bs:{hp:35,atk:70,def:55,spa:45,spd:55,spe:25},moves:[7,29,26,45],cr:190,xp:70},50:{id:50,name:'Diglett',types:['Ground'],bs:{hp:10,atk:55,def:25,spa:35,spd:45,spe:95},moves:[7,49,53],cr:255,xp:81},52:{id:52,name:'Meowth',types:['Normal'],bs:{hp:40,atk:45,def:35,spa:40,spd:40,spe:90},moves:[7,2,36,18],cr:255,xp:69},54:{id:54,name:'Psyduck',types:['Water'],bs:{hp:50,atk:52,def:48,spa:65,spd:50,spe:55},moves:[7,25,14],cr:190,xp:80},56:{id:56,name:'Mankey',types:['Fighting'],bs:{hp:40,atk:80,def:35,spa:35,spd:45,spe:70},moves:[7,37,43,32],cr:190,xp:74},60:{id:60,name:'Poliwag',types:['Water'],bs:{hp:40,atk:50,def:40,spa:40,spd:40,spe:90},moves:[14,42,15],cr:255,xp:60},63:{id:63,name:'Abra',types:['Psychic'],bs:{hp:25,atk:20,def:15,spa:105,spd:55,spe:90},moves:[25,24],cr:200,xp:73},74:{id:74,name:'Geodude',types:['Rock','Ground'],bs:{hp:40,atk:80,def:100,spa:30,spd:30,spe:20},moves:[1,34,28],cr:255,xp:73},92:{id:92,name:'Gastly',types:['Ghost','Poison'],bs:{hp:30,atk:35,def:30,spa:100,spd:35,spe:80},moves:[33,25,47],cr:190,xp:95},100:{id:100,name:'Voltorb',types:['Electric'],bs:{hp:40,atk:30,def:50,spa:55,spd:55,spe:100},moves:[19,48,17,20],cr:190,xp:66},104:{id:104,name:'Cubone',types:['Ground'],bs:{hp:50,atk:50,def:95,spa:40,spd:50,spe:35},moves:[1,34,50],cr:190,xp:87},109:{id:109,name:'Koffing',types:['Poison'],bs:{hp:40,atk:65,def:95,spa:60,spd:45,spe:35},moves:[1,27,48,41],cr:190,xp:114},129:{id:129,name:'Magikarp',types:['Water'],bs:{hp:20,atk:10,def:55,spa:15,spd:20,spe:80},moves:[40],cr:255,xp:20},
+2:{id:2,name:'Ivysaur',types:['Grass','Poison'],bs:{hp:60,atk:62,def:63,spa:80,spd:80,spe:60},moves:[3,5,4,6],cr:45,xp:141},
+3:{id:3,name:'Venusaur',types:['Grass','Poison'],bs:{hp:80,atk:82,def:83,spa:100,spd:100,spe:80},moves:[5,6,4,17],cr:45,xp:208},
+5:{id:5,name:'Charmeleon',types:['Fire'],bs:{hp:58,atk:64,def:58,spa:80,spd:65,spe:80},moves:[7,8,10,9],cr:45,xp:142},
+6:{id:6,name:'Charizard',types:['Fire','Flying'],bs:{hp:78,atk:84,def:78,spa:109,spd:85,spe:100},moves:[10,30,17,8],cr:45,xp:240},
+8:{id:8,name:'Wartortle',types:['Water'],bs:{hp:59,atk:63,def:80,spa:65,spd:80,spe:58},moves:[14,15,17,12],cr:45,xp:143},
+9:{id:9,name:'Blastoise',types:['Water'],bs:{hp:79,atk:83,def:100,spa:85,spd:105,spe:78},moves:[15,14,17,22],cr:45,xp:239},
+26:{id:26,name:'Raichu',types:['Electric'],bs:{hp:60,atk:90,def:55,spa:90,spd:80,spe:110},moves:[20,18,52,17],cr:75,xp:218},
+133:{id:133,name:'Eevee',types:['Normal'],bs:{hp:55,atk:55,def:50,spa:45,spd:65,spe:55},moves:[1,18,17,2],cr:45,xp:92},
+134:{id:134,name:'Vaporeon',types:['Water'],bs:{hp:130,atk:65,def:60,spa:110,spd:95,spe:65},moves:[15,14,17,18],cr:45,xp:184},
+135:{id:135,name:'Jolteon',types:['Electric'],bs:{hp:65,atk:65,def:60,spa:110,spd:95,spe:130},moves:[20,18,52,17],cr:45,xp:184},
+136:{id:136,name:'Flareon',types:['Fire'],bs:{hp:65,atk:130,def:60,spa:95,spd:110,spe:65},moves:[10,8,17,18],cr:45,xp:184},
 144:{id:144,name:'Articuno',types:['Ice','Flying'],bs:{hp:90,atk:85,def:100,spa:95,spd:125,spe:85},moves:[22,30,17,6],cr:3,xp:261},
 145:{id:145,name:'Zapdos',types:['Electric','Flying'],bs:{hp:90,atk:90,def:85,spa:125,spd:90,spe:100},moves:[20,30,19,48],cr:3,xp:261},
 146:{id:146,name:'Moltres',types:['Fire','Flying'],bs:{hp:90,atk:100,def:90,spa:125,spd:85,spe:90},moves:[10,30,8,17],cr:3,xp:261},
@@ -298,10 +309,15 @@ function hitCheck(move, atk, def) {
 
 function randEnc(areaName) {
   const a = AREAS[areaName];
+  const maxLv = G.party.length ? Math.max(...G.party.map(p=>p.lv)) : 5;
+  // Scale to player level: ±4 of their highest, always at least area minimum
+  const lo = Math.max(a.min, maxLv - 4);
+  const hi = Math.max(lo, maxLv + 3);
+  const lv = lo + Math.floor(Math.random() * (hi - lo + 1));
   const tot = a.enc.reduce((s,e)=>s+e.w,0);
   let r = Math.random()*tot;
-  for (const e of a.enc) { r-=e.w; if(r<=0) return createMon(e.d, a.min+Math.floor(Math.random()*(a.max-a.min+1))); }
-  return createMon(a.enc[a.enc.length-1].d, a.min);
+  for (const e of a.enc) { r-=e.w; if(r<=0) return createMon(e.d, lv); }
+  return createMon(a.enc[a.enc.length-1].d, lv);
 }
 
 function tryCatch(mon) {
@@ -910,36 +926,69 @@ function renderTitle(){
   </div>`;
 }
 
-let _starterChosen=null;
 function renderName(){return`<div class="screen" style="justify-content:center;gap:20px"><div style="text-align:center"><div class="gold" style="font-size:24px;font-weight:800">What's your name?</div><div style="color:#aaa;font-size:13px;margin-top:6px">Professor Oak needs to know!</div></div><input id="nameIn" type="text" maxlength="12" placeholder="Trainer name" style="background:#0d0d1f;border:2px solid #4466bb;border-radius:10px;padding:14px 16px;color:#fff;font-size:18px;width:100%;outline:none" value="${G.playerName||''}"/><button class="btn-red" onclick="navGo('nameNext')">NEXT →</button></div>`;}
 
+// Starter lines: Bulbasaur, Charmander, Squirtle, Pikachu, Eevee — all evolutions
 const ALL_STARTERS=[
-  {id:1, col:'#5db85a',t:'Grass/Poison',d:'Steady. Leech Seed + status control.'},
-  {id:4, col:'#e2621b',t:'Fire',        d:'Fast attacker. Burns opponents.'},
-  {id:7, col:'#4a90d9',t:'Water',       d:'Tough defender. Great coverage.'},
-  {id:25,col:'#f8c800',t:'Electric',    d:'Super fast. Paralyzes foes.'},
-  {id:63,col:'#f85888',t:'Psychic',     d:'Master of mind. Devastating Sp.Atk.'},
-  {id:92,col:'#705898',t:'Ghost/Poison',d:'Spooky. Hard to hit, hard to stop.'},
-  {id:56,col:'#c03028',t:'Fighting',    d:'Raw power. Breaks through defenses.'},
-  {id:37,col:'#e2621b',t:'Fire',        d:'Cunning fox. Fire and speed combo.'},
-  {id:54,col:'#4a90d9',t:'Water',       d:'Confused but powerful Sp.Atk.'},
-  {id:43,col:'#5db85a',t:'Grass/Poison',d:'Absorb + Sleep Powder specialist.'},
-  {id:104,col:'#e0c068',t:'Ground',     d:'High Def. Bone Club hits hard.'},
-  {id:50,col:'#e0c068',t:'Ground',      d:'Blazing Speed. Earthquake master.'},
-  {id:60,col:'#4a90d9',t:'Water',       d:'Swift swimmer. Powerful Surf.'},
-  {id:39,col:'#f888c8',t:'Normal',      d:'Huge HP pool. Sings foes to sleep.'},
-  {id:129,col:'#4a90d9',t:'Water',      d:'🐟 Ultimate challenge. Legend tier.'},
+  // Bulbasaur line
+  {id:1,  col:'#5db85a', t:'Grass/Poison', d:'Steady grower. Leech Seed + Sleep Powder.'},
+  {id:2,  col:'#5db85a', t:'Grass/Poison', d:'Stronger Grass moves. Great SpAtk.'},
+  {id:3,  col:'#5db85a', t:'Grass/Poison', d:'Fully evolved. Dominant special attacker.'},
+  // Charmander line
+  {id:4,  col:'#e2621b', t:'Fire',          d:'Fast and fiery. Burns opponents.'},
+  {id:5,  col:'#e2621b', t:'Fire',          d:'Faster. Flamethrower at full power.'},
+  {id:6,  col:'#e2621b', t:'Fire/Flying',   d:'Fully evolved. High SpAtk + Wing Attack.'},
+  // Squirtle line
+  {id:7,  col:'#4a90d9', t:'Water',         d:'Tough defender. Surf + Ice Beam.'},
+  {id:8,  col:'#4a90d9', t:'Water',         d:'Better bulk. Surf + Body Slam.'},
+  {id:9,  col:'#4a90d9', t:'Water',         d:'Fully evolved. Best Defense + Ice Beam.'},
+  // Pikachu line
+  {id:25, col:'#f8c800', t:'Electric',      d:'Iconic. Nuzzle paralyzes everything.'},
+  {id:26, col:'#f8a000', t:'Electric',      d:'Evolved. Higher stats across the board.'},
+  // Eevee & Eeveelutions
+  {id:133,col:'#c8a060', t:'Normal',        d:'Flexible. Body Slam + Quick Attack.'},
+  {id:134,col:'#4a90d9', t:'Water',         d:'Vaporeon. Massive HP + Surf.'},
+  {id:135,col:'#f8c800', t:'Electric',      d:'Jolteon. Blazing Speed + Thunderbolt.'},
+  {id:136,col:'#e2621b', t:'Fire',          d:'Flareon. Highest Atk. Flamethrower.'},
 ];
 
+let _starterChosen=[];
+
+function chooseStarter(id){
+  const idx=_starterChosen.indexOf(id);
+  if(idx>=0) _starterChosen.splice(idx,1);
+  else if(_starterChosen.length<6) _starterChosen.push(id);
+  render();
+}
+
 function renderStarter(){
-  return`<div class="screen" style="gap:10px">
-  <div style="text-align:center;flex-shrink:0"><div class="gold" style="font-size:22px;font-weight:800">Choose Your Starter!</div><div style="color:#aaa;font-size:12px">Scroll to see all 15 options. You start with 💰10,000g and all areas unlocked!</div></div>
-  ${ALL_STARTERS.map(s=>`<div onclick="chooseStarter(${s.id})" style="background:${_starterChosen===s.id?'#1e2a48':'#141428'};border-radius:12px;border:${_starterChosen===s.id?`2px solid ${s.col}`:'1px solid #2a2a45'};padding:10px;display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0">
-    <img src="${spr(s.id)}" width="56" height="56" style="image-rendering:pixelated;flex-shrink:0">
-    <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:800;color:${s.col}">${PDB[s.id].name}</div><div style="margin:2px 0">${s.t.split('/').map(t=>tbadge(t.trim())).join('')}</div><div style="color:#bbb;font-size:11px">${s.d}</div></div>
-    ${_starterChosen===s.id?'<span style="font-size:20px;color:#44dd44;flex-shrink:0">✓</span>':''}
-  </div>`).join('')}
-  <button class="${_starterChosen?'btn-red':'btn-disabled'}" style="flex-shrink:0;margin-top:4px" onclick="navGo('startGame')" ${_starterChosen?'':'disabled'}>START ADVENTURE →</button>
+  const remaining=6-_starterChosen.length;
+  const slots=Array.from({length:6},(_,i)=>_starterChosen[i]!=null
+    ?`<div style="background:${ALL_STARTERS.find(s=>s.id===_starterChosen[i])?.col||'#888'}44;border:1px solid ${ALL_STARTERS.find(s=>s.id===_starterChosen[i])?.col||'#888'};border-radius:6px;padding:2px;display:flex;align-items:center;justify-content:center"><img src="${spr(_starterChosen[i])}" width="30" height="30" style="image-rendering:pixelated;display:block"></div>`
+    :`<div style="background:#1a1a35;border:1px dashed #333;border-radius:6px;width:38px;height:38px"></div>`
+  ).join('');
+  return`<div class="screen" style="gap:8px">
+  <div style="flex-shrink:0;background:#0d0d20;border-radius:12px;padding:10px;border:1px solid #333">
+    <div class="gold" style="font-size:18px;font-weight:800;text-align:center;margin-bottom:4px">Choose Your Team of 6</div>
+    <div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:8px">${remaining>0?`${remaining} more to pick — tap to select or deselect`:'Team full! Tap START or swap a pick.'}</div>
+    <div style="display:flex;gap:6px;justify-content:center">${slots}</div>
+    <div style="color:#555;font-size:10px;text-align:center;margin-top:6px">All Pokemon start at Level 45 · 💰10,000g · All areas unlocked</div>
+  </div>
+  ${ALL_STARTERS.map(s=>{
+    const idx=_starterChosen.indexOf(s.id);
+    const sel=idx>=0;
+    const lineNames={1:'Bulbasaur line',4:'Charmander line',7:'Squirtle line',25:'Pikachu line',133:'Eevee line'};
+    return `<div onclick="chooseStarter(${s.id})" style="background:${sel?'#141e38':'#0e0e20'};border-radius:12px;border:${sel?`2px solid ${s.col}`:'1px solid #252535'};padding:8px 10px;display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0">
+      <img src="${spr(s.id)}" width="52" height="52" style="image-rendering:pixelated;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:800;color:${s.col}">${PDB[s.id].name}</div>
+        <div style="margin:2px 0">${s.t.split('/').map(t=>tbadge(t.trim())).join('')}</div>
+        <div style="color:#aaa;font-size:11px">${s.d}</div>
+      </div>
+      ${sel?`<div style="background:${s.col};color:#fff;font-size:13px;font-weight:900;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${idx+1}</div>`:'<div style="width:26px;flex-shrink:0"></div>'}
+    </div>`;
+  }).join('')}
+  <button class="${_starterChosen.length===6?'btn-red':'btn-disabled'}" style="flex-shrink:0;margin-top:4px;font-size:18px;padding:16px" onclick="navGo('startGame')" ${_starterChosen.length<6?'disabled':''}>⚔ START ADVENTURE</button>
   </div>`;
 }
 
@@ -1068,10 +1117,10 @@ function renderParty(){
 // ══════════════════════════════════════════════════════
 function navGo(action) {
   switch(action){
-    case 'new': G.playerName='';G.party=[];G.bag={pokeballs:15,potions:5,gold:10000};G.area='Route 1';G.caught={};_starterChosen=null;OW.player={tx:7,ty:6,px:0,py:0,dir:'down',moving:false,stepF:0,walkCycle:0,targetTX:7,targetTY:6};G.screen='name';render();break;
+    case 'new': G.playerName='';G.party=[];G.bag={pokeballs:15,potions:5,gold:10000};G.area='Route 1';G.caught={};_starterChosen=[];OW.player={tx:7,ty:6,px:0,py:0,dir:'down',moving:false,stepF:0,walkCycle:0,targetTX:7,targetTY:6};G.screen='name';render();break;
     case 'continue': if(loadGame()){G.screen='overworld';render();}break;
     case 'nameNext':{const n=document.getElementById('nameIn');const v=(n&&n.value||G.playerName).trim();if(!v){alert('Please enter your name!');return;}G.playerName=v;G.screen='starter';_starterChosen=null;render();break;}
-    case 'startGame': if(!_starterChosen)return;G.party=[createMon(_starterChosen,5)];saveGame();G.screen='overworld';render();break;
+    case 'startGame': if(_starterChosen.length<6)return;G.party=_starterChosen.map(id=>createMon(id,45));saveGame();G.screen='overworld';render();break;
   }
 }
 
