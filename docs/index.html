@@ -441,6 +441,8 @@ function owUpdate() {
     p.walkCycle++;
     if (p.walkCycle % 2 === 0) SFX.step();
     owOnArrive();
+    // Chain next step immediately if a direction is still held — no gap between tiles
+    if ((_dpadDX || _dpadDY) && !p.moving) owTryMove(_dpadDX, _dpadDY);
   }
 }
 
@@ -825,18 +827,18 @@ function mountOW(container) {
     <div id="ow-btns">
       <div class="dpad">
         <div></div>
-        <div class="dpad-btn" id="dp-up" ontouchstart="e.preventDefault();dpadPress(0,-1)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(0,-1)" onmouseup="dpadRelease()">↑</div>
+        <div class="dpad-btn" id="dp-up" ontouchstart="event.preventDefault();dpadPress(0,-1)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(0,-1)" onmouseup="dpadRelease()">↑</div>
         <div></div>
-        <div class="dpad-btn" id="dp-left" ontouchstart="e.preventDefault();dpadPress(-1,0)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(-1,0)" onmouseup="dpadRelease()">←</div>
+        <div class="dpad-btn" id="dp-left" ontouchstart="event.preventDefault();dpadPress(-1,0)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(-1,0)" onmouseup="dpadRelease()">←</div>
         <div class="dpad-center"></div>
-        <div class="dpad-btn" id="dp-right" ontouchstart="e.preventDefault();dpadPress(1,0)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(1,0)" onmouseup="dpadRelease()">→</div>
+        <div class="dpad-btn" id="dp-right" ontouchstart="event.preventDefault();dpadPress(1,0)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(1,0)" onmouseup="dpadRelease()">→</div>
         <div></div>
-        <div class="dpad-btn" id="dp-down" ontouchstart="e.preventDefault();dpadPress(0,1)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(0,1)" onmouseup="dpadRelease()">↓</div>
+        <div class="dpad-btn" id="dp-down" ontouchstart="event.preventDefault();dpadPress(0,1)" ontouchend="dpadRelease()" ontouchcancel="dpadRelease()" onmousedown="dpadPress(0,1)" onmouseup="dpadRelease()">↓</div>
         <div></div>
       </div>
       <div class="action-btns">
-        <div class="action-btn" style="background:#cc0000;color:#fff" ontouchstart="e.preventDefault();owAction()" onmousedown="owAction()">A</div>
-        <div class="action-btn" style="background:#222;color:#aaa;font-size:12px" ontouchstart="e.preventDefault();owStop();G.screen='shop';render()" onmousedown="owStop();G.screen='shop';render()">🏪</div>
+        <div class="action-btn" style="background:#cc0000;color:#fff" ontouchstart="event.preventDefault();owAction()" onmousedown="owAction()">A</div>
+        <div class="action-btn" style="background:#222;color:#aaa;font-size:12px" ontouchstart="event.preventDefault();owStop();G.screen='shop';render()" onmousedown="owStop();G.screen='shop';render()">🏪</div>
       </div>
     </div>
   </div>`;
@@ -862,9 +864,32 @@ function dpadPress(dx,dy) {
   _dpadDX=dx; _dpadDY=dy;
   owTryMove(dx,dy);
   clearTimeout(OW.holdTimer);
-  OW.holdTimer=setTimeout(function repeat(){owTryMove(_dpadDX,_dpadDY);OW.holdTimer=setTimeout(repeat,130);},380);
+  // Fallback repeat for when facing a wall (movement chain in owUpdate handles the normal case)
+  OW.holdTimer=setTimeout(function repeat(){
+    if(_dpadDX||_dpadDY) owTryMove(_dpadDX,_dpadDY);
+    OW.holdTimer=setTimeout(repeat,120);
+  },180);
 }
-function dpadRelease(){clearTimeout(OW.holdTimer);OW.holdTimer=null;}
+function dpadRelease(){
+  clearTimeout(OW.holdTimer); OW.holdTimer=null;
+  _dpadDX=0; _dpadDY=0;
+}
+
+// Keyboard arrow key support
+const _keyDown={};
+document.addEventListener('keydown',ev=>{
+  if(_keyDown[ev.key])return; _keyDown[ev.key]=true;
+  const map={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]};
+  if(G.screen==='overworld'){
+    const d=map[ev.key]; if(d) dpadPress(d[0],d[1]);
+    if(ev.key===' '||ev.key==='z'||ev.key==='Enter') owAction();
+  }
+  if(G.screen==='battle'&&(ev.key===' '||ev.key==='Enter')) bAdvMsg();
+});
+document.addEventListener('keyup',ev=>{
+  delete _keyDown[ev.key];
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(ev.key)) dpadRelease();
+});
 
 // ══════════════════════════════════════════════════════
 //  SCREENS
